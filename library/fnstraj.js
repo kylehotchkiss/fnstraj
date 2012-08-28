@@ -10,6 +10,9 @@
  * program control here. Flow also flies around async.whilst a bit, which is
  * explained well enough below.
  *
+ * fnstraj.vertPred - Quick predictor for time-tracking purposes. 
+ * fnstraj.predict - fnstraj (linear) predictor loop
+ *
  */ 
 var async    = require('../node_modules/async/lib/async.js');
 var grads    = require('./grads.js');
@@ -73,7 +76,8 @@ exports.predict = function() {
             launch: {
                 latitude: 37.403611,
                 longitude: -79.17,
-                altitude: 0
+                altitude: 0,
+                timestamp: new Date().getTime()
             },
             balloon: {
                 radius: 8,
@@ -117,7 +121,12 @@ exports.predict = function() {
                     callback(); // Blank return - Yikes. Eval this.
                 } else {
                     table[table.length] = { altitude: currAlt };
-                    grads.wind( table[table.length - 2 ], null, "rap", table, cache, callback ); // Variable me!
+                    
+                    time = flight.launch.timestamp + ( 1000 * ( table.length - 1 ) );
+                    
+                    console.log("time " + time)
+                    
+                    grads.wind( table[table.length - 2 ], time, "rap", table, cache, callback ); // Variable me!
                 }            
             } else if ( flight.status === "descending" ) {
                 var descended = 5;
@@ -131,7 +140,10 @@ exports.predict = function() {
                     callback();
                 } else {
                     table[table.length] = { altitude: currAlt };
-                    grads.wind( table[table.length - 2 ], null, "rap", table, cache, callback ); // Variable me!
+                    
+                    time = flight.launch.timestamp + ( 1000 * ( table.length - 1 ) );
+                    
+                    grads.wind( table[table.length - 2 ], time, "rap", table, cache, callback ); // Variable me!
                 }
             }
         },  

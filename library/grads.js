@@ -26,7 +26,7 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
     // Date-Time Corrections //
     ///////////////////////////
     // awk fixme
-    time = new Date(); // override given date
+    time = new Date(); // override given date 
     time = time.setHours( time.getHours() - 5 ); // Turns out this needs to be set to local [executing] timezone.
     
     now    = new Date( time );
