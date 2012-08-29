@@ -23,13 +23,12 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
 
 
     ///////////////////////////
-    // Date-Time Corrections //
-    ///////////////////////////
-    // awk fixme
-    time = new Date(); // override given date 
-    time = time.setHours( time.getHours() - 5 ); // Turns out this needs to be set to local [executing] timezone.
-    
+    // Date/Time Corrections //
+    ///////////////////////////    
     now    = new Date( time );
+    
+    now.setHours( now.getHours() - 5 ); // Probably timezone related fix.
+    
     year   = now.getUTCFullYear();
     month  = ( now.getUTCMonth() < 10 ) ? "0" + ( now.getUTCMonth() + 1 ) : ( now.getUTCMonth() + 1);
     date   = ( now.getUTCDate() < 10 ) ? "0" + now.getUTCDate() : now.getUTCDate();    
@@ -51,7 +50,9 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
 
         modelURL = "rap/rap" + year + month + date + "/rap_" + hour + "z.ascii?";
     } else if ( model === "gfs" ) {
-
+        // pick right forecast hourset
+        
+        modelURL = "gfs/gfs" + year + month + date + "/gfs_" + hour + "z.ascii?";
     } else if ( model === "gfshd" ) {
 
     }
@@ -93,47 +94,59 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
     ///////////////////////////////////
     async.parallel({
         u_wind: function( callback ) {            
-            u_url = url.parse(baseURL + modelURL + u_ext);
-            u_res = ""; 
             
-            u_req = http.get({
-                hostname: u_url.hostname, 
-                path: u_url.path
-            }, function( response ) {
-                response.setEncoding('utf8');
+            // gradscache logic
+            
+            if ( typeof cache[u_ext] !== "undefined" ) {                
+                callback( null, cache[u_ext] );
+            } else {                
+                u_url = url.parse(baseURL + modelURL + u_ext);
+                u_res = ""; 
                 
-                response.on("data", function( data ) {
-                    u_res += data
+                u_req = http.get({
+                    hostname: u_url.hostname, 
+                    path: u_url.path
+                }, function( response ) {
+                    response.setEncoding('utf8');
+                    
+                    response.on("data", function( data ) {
+                        u_res += data
+                    });
+                    
+                    response.on("end", function() {
+                       callback(null, u_res);
+                    });
+                }).on("error", function() {
+                    callback(true, null); 
                 });
-                
-                response.on("end", function() {
-                   callback(null, u_res);
-                });
-            }).on("error", function() {
-                callback(true, null); 
-            });
+            }
         },
 
-        v_wind: function( callback ) {            
-            v_url = url.parse(baseURL + modelURL + v_ext);
-            v_res = "";
+        v_wind: function( callback ) {        
             
-            v_req = http.get({
-                hostname: v_url.hostname, 
-                path: v_url.path
-            }, function( response ) {
-                response.setEncoding('utf8');
+            if ( typeof cache[v_ext] !== "undefined" ) {                
+                callback( null, cache[u_ext] );
+            } else {
+                v_url = url.parse(baseURL + modelURL + v_ext);
+                v_res = "";
                 
-                response.on("data", function( data ) {
-                    v_res += data
+                v_req = http.get({
+                    hostname: v_url.hostname, 
+                    path: v_url.path
+                }, function( response ) {
+                    response.setEncoding('utf8');
+                    
+                    response.on("data", function( data ) {
+                        v_res += data
+                    });
+                    
+                    response.on("end", function() {                   
+                        callback(null, v_res);
+                    });
+                }).on("error", function() {
+                   callback(true, null); 
                 });
-                
-                response.on("end", function() {                   
-                    callback(null, v_res);
-                });
-            }).on("error", function() {
-               callback(true, null); 
-            });
+            }
         }
     }, function( error, results ) {
         if ( error ) {

@@ -105,7 +105,9 @@ exports.predict = function() {
         //////////////////
         // PRIMARY LOOP //
         //////////////////
-        function ( callback ) { // guess what? parameters are a lie. Just pass the table?                        
+        function ( callback ) { 
+            var timestep = flight.launch.timestamp + ((table.length - 1 ) * 1000); //ms or s bro
+            
             if ( flight.status === "ascending" ) {
                 var ascended = position.ascend( table[table.length - 1].altitude, flight.balloon.burst, flight.balloon.lift, flight.balloon.radius );
                 var currAlt = ( ascended * 60 ) + table[table.length - 1].altitude;
@@ -121,12 +123,7 @@ exports.predict = function() {
                     callback(); // Blank return - Yikes. Eval this.
                 } else {
                     table[table.length] = { altitude: currAlt };
-                    
-                    time = flight.launch.timestamp + ( 1000 * ( table.length - 1 ) );
-                    
-                    console.log("time " + time)
-                    
-                    grads.wind( table[table.length - 2 ], time, "rap", table, cache, callback ); // Variable me!
+                    grads.wind( table[table.length - 2 ], timestep, "rap", table, cache, callback ); // Variable me!
                 }            
             } else if ( flight.status === "descending" ) {
                 var descended = 5;
@@ -140,10 +137,7 @@ exports.predict = function() {
                     callback();
                 } else {
                     table[table.length] = { altitude: currAlt };
-                    
-                    time = flight.launch.timestamp + ( 1000 * ( table.length - 1 ) );
-                    
-                    grads.wind( table[table.length - 2 ], time, "rap", table, cache, callback ); // Variable me!
+                    grads.wind( table[table.length - 2 ], timestep, "rap", table, cache, callback ); // Variable me!
                 }
             }
         },  
