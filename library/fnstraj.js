@@ -14,7 +14,7 @@
  * fnstraj.predict - fnstraj (linear) predictor loop
  *
  */ 
-var async    = require('../node_modules/async/lib/async.js');
+var async    = require('async');
 var grads    = require('./grads.js');
 var physics  = require('./physics.js');
 var position = require('./position.js');

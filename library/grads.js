@@ -9,7 +9,7 @@
  */
 var url   = require("url");
 var http  = require("http");
-var async = require('../node_modules/async/lib/async.js'); // ugh fixme
+var async = require('async');
 var position = require('./position.js');
 
 

@@ -3,8 +3,8 @@
     "version": "0.2.0",
     "author": "Hotchkissmade <hello@hotchkissmade.com>",
     "description": "Trajectory Predictor",
-    "dependencies" : {
-        "async"   :  "1.2.*",
+    "dependencies": {
+        "async":  "0.1.x"
     },
     "license": "GPL",
     "engine": {
