@@ -4,7 +4,8 @@
     "author": "Hotchkissmade <hello@hotchkissmade.com>",
     "description": "Trajectory Predictor",
     "dependencies": {
-        "async":  "0.1.x"
+        "async":  "0.1.x",
+        "express": "3.0.x"
     },
     "license": "GPL",
     "engine": {

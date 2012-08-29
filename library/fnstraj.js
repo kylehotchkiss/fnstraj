@@ -65,8 +65,8 @@ exports.vertPred = function( launchAlt, burstAlt, radius, lift ) {
 ///////////////////////////////////
 exports.predict = function() {
     var table = [{
-            latitude: 37.403611,
-            longitude: -79.17,
+            latitude: 38.301829,
+            longitude: -77.470778,
             altitude: 0
         }],
         cache = [],
@@ -74,8 +74,8 @@ exports.predict = function() {
             flying: true,
             status: "ascending",
             launch: {
-                latitude: 37.403611,
-                longitude: -79.17,
+                latitude: 38.301829, 
+                longitude: -77.470778,
                 altitude: 0,
                 timestamp: new Date().getTime()
             },

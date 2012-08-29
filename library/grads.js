@@ -97,7 +97,7 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
             
             // gradscache logic
             
-            if ( typeof cache[u_ext] !== "undefined" ) {                
+            if ( typeof cache[u_ext] !== "undefined" && cache[u_ext] !== '' ) {                
                 callback( null, cache[u_ext] );
             } else {                
                 u_url = url.parse(baseURL + modelURL + u_ext);
@@ -124,7 +124,7 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
 
         v_wind: function( callback ) {        
             
-            if ( typeof cache[v_ext] !== "undefined" ) {                
+            if ( typeof cache[v_ext] !== "undefined" && cache[v_ext] !== '' ) {                
                 callback( null, cache[u_ext] );
             } else {
                 v_url = url.parse(baseURL + modelURL + v_ext);
@@ -161,19 +161,18 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
             if ( results.u_wind.indexOf("GrADS Data Server") !== -1 && results.v_wind.indexOf("GrADS Data Server") !== -1 ) {
                 //
                 // This piece catches a little bug called a "GrADS Fail."
-                // What's that? your innocent mind ponders. Ugh, try a 
-                // completely nondescript error that breaks everything
-                // and I mean everything. God save the queen.
+                // What's that? your innocent mind ponders. It's the end,
+                // I answer, wallowing in all my lost predictions.
                 //
                 console.log("grads fail fuuuuuu");
                 
                 parentCallback( true );
-            } else {        
-                u_wind = results.u_wind.substring( u_res.indexOf("[0],") + 5, u_res.indexOf("\n", 30));
+            } else {
+                u_wind = results.u_wind.substring( results.u_wind.indexOf("[0],") + 5, results.u_wind.indexOf("\n", 30));
                 v_wind = results.v_wind.substring( results.v_wind.indexOf("[0],") + 5, results.v_wind.indexOf("\n", 30));
                 u_wind = u_wind.trim();
                 v_wind = v_wind.trim();
-                
+             
                 cache[u_ext] = u_wind;
                 cache[v_ext] = v_wind;
                 
