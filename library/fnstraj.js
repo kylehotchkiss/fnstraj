@@ -77,16 +77,16 @@ exports.predict = function() {
         
         
         table = [{
-            latitude: 38.301829,
-            longitude: -77.470778,
+            latitude: 37.403672, 
+            longitude: -79.170205,
             altitude: 0
         }],
         flight = {
             flying: true,
             status: "ascending",
             launch: {
-                latitude: 38.301829, 
-                longitude: -77.470778,
+                latitude: 37.403672, 
+                longitude: -79.170205,
                 altitude: 0,
                 timestamp: new Date().getTime()
             },

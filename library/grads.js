@@ -171,13 +171,12 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
                 
                 parentCallback( true );
             } else {
+                cache[u_ext] = results.u_wind;
+                cache[v_ext] = results.v_wind;
                 u_wind = results.u_wind.substring( results.u_wind.indexOf("[0],") + 5, results.u_wind.indexOf("\n", 30));
                 v_wind = results.v_wind.substring( results.v_wind.indexOf("[0],") + 5, results.v_wind.indexOf("\n", 30));
                 u_wind = u_wind.trim();
                 v_wind = v_wind.trim();
-             
-                cache[u_ext] = u_wind;
-                cache[v_ext] = v_wind;
                 
                 heading = Math.atan2( v_wind, u_wind ) * degrees;
                 speed = Math.sqrt( Math.pow(Math.abs(v_wind), 2) + Math.pow(Math.abs(u_wind), 2) );
