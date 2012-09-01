@@ -14,7 +14,7 @@ var position = require('./position.js');
 
 
 
-exports.wind = function( frame, time, model, table, cache, parentCallback ) { // ugh, make position into an object or something
+exports.wind = function( frame, time, model, table, cache, stats, parentCallback ) {
     var lev, u_ext, v_ext;
     var radians = Math.PI / 180;
     var degrees = 180 / Math.PI;
@@ -26,15 +26,12 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
     // Date/Time Corrections //
     ///////////////////////////    
     now    = new Date( time );
-    
-    now.setHours( now.getHours() - 5 ); // Probably timezone related fix.
-    
+    now.setHours( now.getHours() - 5 ); // Probably timezone related fix?
     year   = now.getUTCFullYear();
     month  = ( now.getUTCMonth() < 10 ) ? "0" + ( now.getUTCMonth() + 1 ) : ( now.getUTCMonth() + 1);
     date   = ( now.getUTCDate() < 10 ) ? "0" + now.getUTCDate() : now.getUTCDate();    
     hour   = ( now.getUTCHours() < 10 ) ? "0" + now.getUTCHours() : now.getUTCHours();
     minute = Math.round(( now.getUTCMinutes() / 60) * 18 );
-    // endawk fixme
 
 
  
@@ -63,7 +60,7 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
     // Altitude Level Determination //
     //////////////////////////////////
     if ( frame.altitude < 12000 ) {
-        level = Math.round(( frame.altitude / 12000 ) * 36);
+        level = Math.round(( frame.altitude / 12000 ) * 36); // Does this apply to GFS/GFSHD?
 
         u_ext = "ugrdprs[" + minute + "][" + level + "][" + latitude + "][" + longitude + "]";
         v_ext = "vgrdprs[" + minute + "][" + level + "][" + latitude + "][" + longitude + "]";
@@ -93,12 +90,13 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
     // Get Wind Files (Concurrently) //
     ///////////////////////////////////
     async.parallel({
-        u_wind: function( callback ) {            
-            
-            // gradscache logic
-            
+        u_wind: function( callback ) {          
             if ( typeof cache[u_ext] !== "undefined" && cache[u_ext] !== '' ) {                
+                //
+                // Pull from gradscache?
+                //  
                 callback( null, cache[u_ext] );
+                stats.cacheHits++;
             } else {                
                 u_url = url.parse(baseURL + modelURL + u_ext);
                 u_res = ""; 
@@ -115,6 +113,7 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
                     
                     response.on("end", function() {
                        callback(null, u_res);
+                       stats.gradsHits++;
                     });
                 }).on("error", function() {
                     callback(true, null); 
@@ -123,9 +122,12 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
         },
 
         v_wind: function( callback ) {        
-            
             if ( typeof cache[v_ext] !== "undefined" && cache[v_ext] !== '' ) {                
+                //
+                // Pull from gradscache?
+                //  
                 callback( null, cache[u_ext] );
+                stats.cacheHits++;
             } else {
                 v_url = url.parse(baseURL + modelURL + v_ext);
                 v_res = "";
@@ -142,6 +144,7 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
                     
                     response.on("end", function() {                   
                         callback(null, v_res);
+                        stats.gradsHits++;
                     });
                 }).on("error", function() {
                    callback(true, null); 
@@ -164,7 +167,7 @@ exports.wind = function( frame, time, model, table, cache, parentCallback ) { //
                 // What's that? your innocent mind ponders. It's the end,
                 // I answer, wallowing in all my lost predictions.
                 //
-                console.log("grads fail fuuuuuu");
+                console.log("gradsfail fuuuuuu");
                 
                 parentCallback( true );
             } else {

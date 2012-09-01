@@ -64,12 +64,20 @@ exports.vertPred = function( launchAlt, burstAlt, radius, lift ) {
 // fnstraj Linear Predictor Loop //
 ///////////////////////////////////
 exports.predict = function() {
-    var table = [{
+    
+    // schema establish, ditch the consts kthxbyez.
+    
+    var cache = [],
+        stats = {
+            frames: 0,
+            gradsHits: 0,
+            cacheHits: 0,
+        }, 
+        table = [{
             latitude: 38.301829,
             longitude: -77.470778,
             altitude: 0
         }],
-        cache = [],
         flight = {
             flying: true,
             status: "ascending",
@@ -123,7 +131,10 @@ exports.predict = function() {
                     callback(); // Blank return - Yikes. Eval this.
                 } else {
                     table[table.length] = { altitude: currAlt };
-                    grads.wind( table[table.length - 2 ], timestep, "rap", table, cache, callback ); // Variable me!
+                    
+                    stats.frames++;
+                    
+                    grads.wind( table[table.length - 2 ], timestep, "rap", table, cache, stats, callback ); // Variable me!
                 }            
             } else if ( flight.status === "descending" ) {
                 var descended = 5;
@@ -134,10 +145,16 @@ exports.predict = function() {
                     // Crash! (Or land?)
                     //
                     flight.flying = false;
+                    
+                    console.log(JSON.stringify(stats));
+                    
                     callback();
                 } else {
                     table[table.length] = { altitude: currAlt };
-                    grads.wind( table[table.length - 2 ], timestep, "rap", table, cache, callback ); // Variable me!
+                    
+                    stats.frames++;
+                    
+                    grads.wind( table[table.length - 2 ], timestep, "rap", table, cache, stats, callback ); // Variable me!
                 }
             }
         },  
