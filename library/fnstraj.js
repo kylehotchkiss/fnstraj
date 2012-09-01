@@ -73,6 +73,9 @@ exports.predict = function() {
             gradsHits: 0,
             cacheHits: 0,
         }, 
+        
+        
+        
         table = [{
             latitude: 38.301829,
             longitude: -77.470778,
@@ -166,7 +169,7 @@ exports.predict = function() {
         ///////////////////////////////
         function ( error ) {             
             if ( error != null ) {
-                console.log("Failureee.");
+                console.log("Closing");
             }
         }
     );

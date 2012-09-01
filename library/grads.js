@@ -153,7 +153,7 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
         }
     }, function( error, results ) {
         if ( error ) {
-            console.log("Grads Fail");
+            console.log("gradsfail: Request Error (can you reach http://nomads.ncep.noaa.gov:9090/ ?)");
                 
             parentCallback( error );
         } else {
@@ -167,7 +167,7 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
                 // What's that? your innocent mind ponders. It's the end,
                 // I answer, wallowing in all my lost predictions.
                 //
-                console.log("gradsfail fuuuuuu");
+                console.log("gradsfail: Unknown Error (probably time offset).");
                 
                 parentCallback( true );
             } else {
