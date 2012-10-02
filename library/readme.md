@@ -2,6 +2,13 @@
 
 This is the actual trajectory prediction code. This was the majority of the challenges to the project at first. Now they are much easier to grasp. I think I have them organized in a way that will help you understand what is going on. 
 
+### fnstraj.js
+This is the primary trajectory predictor loop and logic flow for a normal, start-to-finish trajectory. It's a complex beast to understand, as it is written in async.js (which is a refreshing fix from hard-coding all that asynchronously). You'll need to read through the comments to see what each block is doing here. Being the logic flow controller, this is also where everything else that is happening is called from. 
+
+The most important data here are `flight` and `table`. `flight` contains all the information about the launch, flight, balloon, and parachute, amounst some runtime variables. `table` contains the actual flight path and is directly used for all of the outputs. 
+
+Oh yeah, there is also a vertical predictor here. That is really only used for timers in the interface, it's a basic trajectory loop that just handles vertical ascents and descents the same way the actual trajectory program does. Don't mind it too much.
+
 ### grads.js
 When you are trying to understand where a balloon is flying, it is probably in your best interest to know what direction the wind is going. These functions are how that happens. It takes the 4D coordinates (longitude, latitude, altitude, time) and returns the speed and heading that the wind **should be** heading (they are still predictions, there is no such thing as high altitude anemometers). 
 
@@ -11,6 +18,9 @@ There are some notable glitches with NOAA GrADS you *probably* need to be aware 
 
 ### helpers.js
 These functions connect with several different APIs to provide higher quality metadata on various predection aspects. For example, Google's geolocation API gives users named locations, instead of coordinates.
+
+### output.js
+This is an awesome file, because it allows us to easily output trajectories in pretty much any format we could desire, including databases. It's very modular, just create an output function with the parameters `table` and `callback` and then throw that function up in the `async.parallel` section up above. Yes, all outputs happen in parallel! Pretty awesome.
 
 ### physics.js
 This one is the one that probably needs some peer review. It just contains all the physics related functions. They're mostly just forms of the standard drag formula. They get ran several hundred times and you have a trajectory. Tada!

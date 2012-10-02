@@ -10,12 +10,15 @@ var async = require('async');
 
 
 
+////////////////////////////////////////
+// MODULAR FILE EXPORTS (in parallel) //
+////////////////////////////////////////
 exports.writeFiles = function( table, parentCallback ) {
-	
 	async.parallel([
-		//////////////////////////
-		// Modular File Outputs //
-		//////////////////////////
+		//
+		// Just throw in any other output functions
+		// below and then add them to this array.
+		//
 		function( callback ) {
 			exports.writeCSV( table, callback );
 		},
