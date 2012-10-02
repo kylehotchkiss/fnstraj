@@ -14,3 +14,10 @@ I'm trying to take as minimalistic an approach towards feature cuft as possible.
 4. Edit app.js and change the coordinates to your current ones (I'm working on giving this a better interface)
 5. `node app.js`
 6. You will either get an error message or see a list of coordinates. If you see an error message that says something about a time offset, and you don't live in the EST/EDT timezone, please leave a bug report, as I think this may be a bug. If you see a list of coordinates, look in your `exports/` folder, double click the KML - TADA, kinda a trajectory :)
+
+## Special Thanks
+* UKHAS, for your absolutely brilliant web resources on ballooning.
+* Wolfram Alpha, for always knowing the answer to "Air Pressure at 80,000ft".
+* Austin Jones, for helping me with these insanely complicated math questions every time I ask.
+* Nathan Hotchkiss, for saying "cool" when I showed you this. And for listening to me talk about it for years.
+* The friends who supported me in this, taking some time to at least see what it does!
