@@ -16,6 +16,7 @@
  */ 
 var async    = require('async');
 var grads    = require('./grads.js');
+var output   = require('./output.js');
 var physics  = require('./physics.js');
 var position = require('./position.js');
  
@@ -63,47 +64,16 @@ exports.vertPred = function( launchAlt, burstAlt, radius, lift ) {
 ///////////////////////////////////
 // fnstraj Linear Predictor Loop //
 ///////////////////////////////////
-exports.predict = function() {
-    
-    // schema establish, ditch the consts kthxbyez.
-    // Can we create an object? cleannnerrrr
-    
+exports.predict = function( flight ) {
     var cache = [],
-        stats = {
-            frames: 0,
-            gradsHits: 0,
-            cacheHits: 0,
-        }, 
+        stats = { frames: 0, gradsHits: 0, cacheHits: 0 },
+        table = [{ latitude: flight.launch.latitude, longitude: flight.launch.longitude, altitude: flight.launch.altitude }];
+        
+    flight.flying = true;
+    flight.status = "ascending";
         
         
         
-        table = [{
-            latitude: 37.403672, 
-            longitude: -79.170205,
-            altitude: 0
-        }],
-        flight = {
-            flying: true,
-            status: "ascending",
-            launch: {
-                latitude: 37.403672, 
-                longitude: -79.170205,
-                altitude: 0,
-                timestamp: new Date().getTime()
-            },
-            balloon: {
-                radius: 8,
-                lift: 2,
-                burst: 30000
-            },
-            parachute: {
-                radius: 0,
-                weight: 0
-            }
-        };
-            
-    
-    
     async.whilst(
         ////////////////////
         // LOOP CONDITION // 
@@ -124,41 +94,45 @@ exports.predict = function() {
                 var ascended = position.ascend( table[table.length - 1].altitude, flight.balloon.burst, flight.balloon.lift, flight.balloon.radius );
                 var currAlt = ( ascended * 60 ) + table[table.length - 1].altitude;
                      
-                if ( currAlt >= flight.balloon.burst ) {
+                if ( currAlt < flight.balloon.burst ) {
+                    table[table.length] = { altitude: currAlt };
+                    
+                    stats.frames++;
+                    
+                    grads.wind( table[table.length - 2 ], timestep, "rap", table, cache, stats, callback ); // Variable me!
+                } else {
                     //
-                    // Burst!
+                    // Burst 
+                    // Logic flow: transision to descent mode.
                     //
                     flight.points = {
                         burst: { latitude: table[table.length - 1].latitude, longitude: table[table.length - 1].longitude, altitude: table[table.length - 1].altitude }
                     };
+                    
                     flight.status = "descending";   
-                    callback(); // Blank return - Yikes. Eval this.
-                } else {
-                    table[table.length] = { altitude: currAlt };
                     
-                    stats.frames++;
-                    
-                    grads.wind( table[table.length - 2 ], timestep, "rap", table, cache, stats, callback ); // Variable me!
-                }            
+                    callback(); // Blank return - Yikes. Eval this. 
+                }       
             } else if ( flight.status === "descending" ) {
                 var descended = 5;
                 var currAlt = table[table.length - 1].altitude - ( descended * 60 );
                     
-                if ( currAlt < 0 ) {
-                    //
-                    // Crash! (Or land?)
-                    //
-                    flight.flying = false;
-                    
-                    console.log(JSON.stringify(stats));
-                    
-                    callback();
-                } else {
+                if ( currAlt > 0 ) {
                     table[table.length] = { altitude: currAlt };
                     
                     stats.frames++;
                     
                     grads.wind( table[table.length - 2 ], timestep, "rap", table, cache, stats, callback ); // Variable me!
+                } else {
+                    //
+                    // Landing
+                    // Logic flow: calculation complete, finalize.
+                    //
+                    flight.flying = false;
+                    
+                    output.writeFiles(table, callback);
+                    
+                    console.log(JSON.stringify(stats));
                 }
             }
         },  
