@@ -169,8 +169,6 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
                 //
                 console.log("\033[0;31mgradsfail: Unknown Error (probably time offset).\033[0m");
                 
-                console.log(results.u_wind);
-                
                 parentCallback( true );
             } else {
                 cache[u_ext] = results.u_wind;
