@@ -28,7 +28,7 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
     now    = new Date( time );
     now.setHours( now.getHours() - 5 ); // Probably timezone related fix?
     year   = now.getUTCFullYear();
-    month  = ( now.getUTCMonth() < 10 ) ? "0" + ( now.getUTCMonth() + 1 ) : ( now.getUTCMonth() + 1);
+    month  = ( now.getUTCMonth() < 9 ) ? "0" + ( now.getUTCMonth() + 1 ) : ( now.getUTCMonth() + 1);
     date   = ( now.getUTCDate() < 10 ) ? "0" + now.getUTCDate() : now.getUTCDate();    
     hour   = ( now.getUTCHours() < 10 ) ? "0" + now.getUTCHours() : now.getUTCHours();
     minute = Math.round(( now.getUTCMinutes() / 60) * 18 );
@@ -168,6 +168,8 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
                 // I answer, wallowing in all my lost predictions.
                 //
                 console.log("\033[0;31mgradsfail: Unknown Error (probably time offset).\033[0m");
+                
+                console.log(results.u_wind);
                 
                 parentCallback( true );
             } else {
