@@ -66,6 +66,7 @@ exports.vertPred = function( launchAlt, burstAlt, radius, lift ) {
 exports.predict = function() {
     
     // schema establish, ditch the consts kthxbyez.
+    // Can we create an object? cleannnerrrr
     
     var cache = [],
         stats = {
