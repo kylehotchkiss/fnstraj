@@ -1,10 +1,8 @@
 # fnstraj
-This is the hardest thing I've ever done.  Node.js based trajectory predictor. First (and only) trajectory predictor running on NOAA RAP (as far as I know, please correct me if I'm wrong)
+This is the hardest thing I've ever done.  Node.js-based balloon trajectory predictor. First (and only) trajectory predictor running on NOAA RAP (as far as I know, please correct me if I'm wrong)
 
 
 ## Usage
-This repo is more for people who are interested in hacking the code or learning it how it works. To use this predictor, head on over to http://trajectory.flynearspace.org/. Enjoy :)
-
 1. You'll need Node.js and Google Earth to test.
 2. Fork this repo.
 3. `npm install` in the directory.
