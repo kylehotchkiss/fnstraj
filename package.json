@@ -5,7 +5,8 @@
     "description": "Trajectory Predictor",
     "dependencies": {
         "async":  "0.1.x",
-        "express": "3.0.x"
+        "express": "3.0.x",
+        "validator": "0.4.x"
     },
     "license": "GPL",
     "engine": {

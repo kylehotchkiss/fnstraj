@@ -7,27 +7,36 @@
  */
  
 var fnstraj = require('./library/fnstraj.js');
+var sanitize = require('validator').sanitize;
 
 
 
-flight = {
-    launch: {
-        latitude: 37.403672, 
-        longitude: -79.170205,
-        altitude: 0,
-        timestamp: new Date().getTime()
-    },
-    balloon: {
-        radius: 8,
-        lift: 2,
-        burst: 30000
-    },
-    parachute: {
-        radius: 0,
-        weight: 0
-    }
-};
+if ( process.argv.length >= 5 ) {
+    latitude = sanitize(process.argv[2]).toFloat();
+    longitude = sanitize(process.argv[3]).toFloat();
+    altitude = sanitize(process.argv[4]).toFloat();
+    
+    
+    flight = {
+        launch: {
+            latitude: sanitize(latitude).toFloat(), 
+            longitude: sanitize(longitude).toFloat(),
+            altitude: sanitize(altitude).toFloat(),
+            timestamp: new Date().getTime()
+        },
+        balloon: {
+            radius: 8,
+            lift: 2,
+            burst: 30000
+        },
+        parachute: {
+            radius: 0,
+            weight: 0
+        }
+    };
+    
+    fnstraj.predict( flight );
+} else {
+    console.log("Usage: node app.js [latitude] [longitude] [altitude]");
+}
 
-
-
-fnstraj.predict( flight );
