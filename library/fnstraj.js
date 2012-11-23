@@ -72,7 +72,7 @@ exports.predict = function( flight ) {
     flight.flying = true;
     flight.status = "ascending";
         
-        
+    console.log("\033[1;34m\n FNSTRAJ BALLOON TRAJECTORY PREDICTOR\n\n \033[1;37mGenerating flight path (this will take several minutes)...\n\033[0m ");
         
     async.whilst(
         ////////////////////
@@ -91,7 +91,7 @@ exports.predict = function( flight ) {
             var timestep = flight.launch.timestamp + ((table.length - 1 ) * 1000); //ms or s bro
             
             if ( flight.status === "ascending" ) {
-                var ascended = position.ascend( table[table.length - 1].altitude, flight.balloon.burst, flight.balloon.lift, flight.balloon.radius );
+                var ascended = 5;//position.ascend( table[table.length - 1].altitude, flight.balloon.burst, flight.balloon.lift, flight.balloon.radius );
                 var currAlt = ( ascended * 60 ) + table[table.length - 1].altitude;
                      
                 if ( currAlt < flight.balloon.burst ) {
@@ -130,9 +130,9 @@ exports.predict = function( flight ) {
                     //
                     flight.flying = false;
                     
-                    output.writeFiles(table, callback);
-                    
-                    console.log(JSON.stringify(stats));
+                    process.nextTick(function() {
+                        output.writeFiles(table, callback);
+                    });
                 }
             }
         },  

@@ -19,7 +19,7 @@ var DEGREES = 180 / Math.PI;
 var GRAVITY = 9.80665;
 
 
-exports.travel = function( frame, distance, heading ) {    
+exports.travel = function( frame, distance, heading ) {
     radius   = (6367500 + frame.altitude) * RADIANS;
     oldLat   = frame.latitude * RADIANS;
     oldLon   = frame.longitude * RADIANS;
@@ -77,6 +77,11 @@ exports.midpoint = function( startLat, startLon, endLat, endLon ) {
     
     
 exports.ascend = function( currAlt, burstAlt, lift, radius ) {	
+    //
+    // Altitude: Metres
+    // Lift: Kilograms
+    // Radius: Metres (?)
+    //
     return Math.sqrt(( lift / 1000 ) * GRAVITY / (.5 * .3 * physics.density(currAlt) * ((( radius * radius ) * Math.PI ) / 10000 )));
 };
     

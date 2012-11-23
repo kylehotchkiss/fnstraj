@@ -14,6 +14,12 @@ var position = require('./position.js');
 
 
 
+//
+// If this gets a damn null latitude/longitude HELL NULL ANYTHINg
+// then cut the execution.
+//
+
+
 exports.wind = function( frame, time, model, table, cache, stats, parentCallback ) {
     var lev, u_ext, v_ext;
     var radians = Math.PI / 180;
@@ -96,6 +102,7 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
                 // Pull from gradscache?
                 //  
                 callback( null, cache[u_ext] );
+                
                 stats.cacheHits++;
             } else {                
                 u_url = url.parse(baseURL + modelURL + u_ext);
@@ -113,6 +120,7 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
                     
                     response.on("end", function() {
                        callback(null, u_res);
+                       
                        stats.gradsHits++;
                     });
                 }).on("error", function() {
@@ -127,6 +135,7 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
                 // Pull from gradscache?
                 //  
                 callback( null, cache[u_ext] );
+                
                 stats.cacheHits++;
             } else {
                 v_url = url.parse(baseURL + modelURL + v_ext);
@@ -144,6 +153,7 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
                     
                     response.on("end", function() {                   
                         callback(null, v_res);
+                        
                         stats.gradsHits++;
                     });
                 }).on("error", function() {
@@ -178,16 +188,15 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
                 u_wind = u_wind.trim();
                 v_wind = v_wind.trim();
                 
-                heading = Math.atan2( v_wind, u_wind ) * degrees;
-                speed = Math.sqrt( Math.pow(Math.abs(v_wind), 2) + Math.pow(Math.abs(u_wind), 2) );
+                offset     = Math.atan2( v_wind, u_wind ) * degrees; // Is an offset from {below} value.
+                heading = ( 270 + offset ) - 180; // Proper direction.
+                speed       = Math.sqrt( Math.pow(Math.abs(v_wind), 2) + Math.pow(Math.abs(u_wind), 2) );
                 
                 // Can I be moved into primary loop via callback of any sort?
                 newPoints = position.travel(table[table.length - 2 ], speed * 60, heading);                           
                 table[table.length - 1].latitude = newPoints[0];
                 table[table.length - 1].longitude = newPoints[1];
                 // end moveme
-                
-                console.log(newPoints[1] + "," + newPoints[0] + "," + table[table.length - 1].altitude );
                 
                 parentCallback();
             }
