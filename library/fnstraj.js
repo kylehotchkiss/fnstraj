@@ -72,7 +72,13 @@ exports.predict = function( flight ) {
     flight.flying = true;
     flight.status = "ascending";
 
-    console.log("\033[1;34m\n FNSTRAJ BALLOON TRAJECTORY PREDICTOR\n\n \033[1;37mGenerating flight path (this will take several minutes)...\n\033[0m ");
+    if ( typeof flight.options.model !== "undefined" ) {
+        if ( flight.options.model !== "rap" || flight.options.model !== "gfs" || flight.options.model != "gfshd" ) {
+            flight.options.model = "gfs"; // Make this "auto" in the future
+        }
+    }
+
+    console.log("\033[1;34m\n FNSTRAJ BALLOON TRAJECTORY PREDICTOR\033[0m\n\n Using the " + flight.options.model + " weather model.\n\n \033[1;37mGenerating flight path (this will take several minutes)...\n\033[0m ");
 
     async.whilst(
         ////////////////////
@@ -99,7 +105,7 @@ exports.predict = function( flight ) {
 
                     stats.frames++;
 
-                    grads.wind( table[table.length - 2 ], timestep, "gfs", table, cache, stats, callback ); // Variable me!
+                    grads.wind( table[table.length - 2 ], timestep, flight.options.model, table, cache, stats, callback ); // Variable me!
                 } else {
                     //
                     // Burst
@@ -122,7 +128,7 @@ exports.predict = function( flight ) {
 
                     stats.frames++;
 
-                    grads.wind( table[table.length - 2 ], timestep, "gfs", table, cache, stats, callback ); // Variable me!
+                    grads.wind( table[table.length - 2 ], timestep, flight.options.model, table, cache, stats, callback ); // Variable me!
                 } else {
                     //
                     // Landing

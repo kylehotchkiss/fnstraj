@@ -161,16 +161,39 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
             v_ext = "vgrd30_0mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
         }
     } else if ( model === "gfshd" ) {
-        latitude  = Math.floor((( frame.latitude + 90 ) / ( 180 )) * 360 );
-        longitude = Math.floor(( frame.longitude / 359.5 ) / 719 );
-        //modelURl =
+        latitude  = Math.floor((( frame.latitude + 180 ) / 360 ) * 360 );
+        longitude = Math.floor((( frame.longitude + 180 ) / 360 ) * 720 );
+        modelURL = "gfs_hd/gfs_hd" + year + month + date + "/gfs_hd_" + gfs_hourset + "z.ascii?";
 
 
 
         //////////////////////////////////
         // Altitude Level Determination //
         //////////////////////////////////
+        if ( frame.altitude < 12000 ) {
+            level = Math.round(( frame.altitude / 12000 ) * 46);
 
+            u_ext = "ugrdprs[" + gfs_offset + "][" + level + "][" + latitude + "][" + longitude + "]";
+            v_ext = "vgrdprs[" + gfs_offset + "][" + level + "][" + latitude + "][" + longitude + "]";
+        } else if ( frame.altitude >= 12000 && frame.altitude < 14000 ) {
+            u_ext = "ugrd180_150mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
+            v_ext = "vgrd180_150mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
+        } else if ( frame.altitude >= 14000 && frame.altitude < 15000 ) {
+            u_ext = "ugrd150_120mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
+            v_ext = "vgrd150_120mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
+        } else if ( frame.altitude >= 15000 && frame.altitude < 17000 ) {
+            u_ext = "ugrd120_90mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
+            v_ext = "vgrd120_90mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
+        } else if ( frame.altitude >= 17000 && frame.altitude < 19000 ) {
+            u_ext = "ugrd90_60mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
+            v_ext = "vgrd90_60mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
+        } else if ( frame.altitude >= 19000 && frame.altitude < 24000 ) {
+            u_ext = "ugrd60_30mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
+            v_ext = "vgrd60_30mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
+        } else if ( frame.altitude >= 24000 ) {
+            u_ext = "ugrd30_0mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
+            v_ext = "vgrd30_0mb[" + gfs_offset + "][" + latitude + "][" + longitude + "]";
+        }
     }
 
 

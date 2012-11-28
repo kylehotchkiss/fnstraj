@@ -24,6 +24,10 @@ if ( process.argv.length >= 4 ) {
     weight    = sanitize(process.argv[9]).toFloat() || 0;
 
     flight = {
+        options: {
+            model: "gfs"
+        },
+
         launch: {
             latitude: sanitize(latitude).toFloat(),
             longitude: sanitize(longitude).toFloat(),
