@@ -24,10 +24,11 @@ var position = require('./position.js');
 //
 
 
-exports.wind = function( frame, time, model, table, cache, stats, parentCallback ) {
+exports.wind = function( frame, time, flight, table, cache, stats, parentCallback ) {
     var gfs_hourset, gfs_offset, now, lev, u_ext, v_ext;
     var radians = Math.PI / 180;
     var degrees = 180 / Math.PI;
+    var model   = flight.options.model;
     var baseURL = "http://nomads.ncep.noaa.gov:9090/dods/";
 
 
@@ -88,10 +89,10 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
     ///////////////////////////
     // Date/Time Corrections //
     ///////////////////////////
-    var year        = now.getUTCFullYear();
-    var month       = ( now.getUTCMonth() < 9 ) ? "0" + ( now.getUTCMonth() + 1 ) : ( now.getUTCMonth() + 1); // wtf why is this one month in the future
-    var date        = ( now.getUTCDate() < 10 ) ? "0" + now.getUTCDate() : now.getUTCDate(); // Check this on the 10th of the month (appears fine)
-    var hour        = ( now.getUTCHours() < 10 ) ? "0" + now.getUTCHours() : now.getUTCHours(); // Check this on the 10th hour (utc?)
+    var year  = now.getUTCFullYear();
+    var month = ( now.getUTCMonth() < 9 ) ? "0" + ( now.getUTCMonth() + 1 ) : ( now.getUTCMonth() + 1); // wtf why is this one month in the future
+    var date  = ( now.getUTCDate() < 10 ) ? "0" + now.getUTCDate() : now.getUTCDate(); // Check this on the 10th of the month (appears fine)
+    var hour  = ( now.getUTCHours() < 10 ) ? "0" + now.getUTCHours() : now.getUTCHours(); // Check this on the 10th hour (utc?)
 
 
 
@@ -294,9 +295,9 @@ exports.wind = function( frame, time, model, table, cache, stats, parentCallback
                 u_wind = u_wind.trim();
                 v_wind = v_wind.trim();
 
-                offset     = Math.atan2( v_wind, u_wind ) * degrees; // Is an offset from {below} value.
-                heading    = ( 270 + offset ) - 180; // Proper direction - Pretty damned critical.
-                speed      = Math.sqrt( Math.pow(Math.abs(v_wind), 2) + Math.pow(Math.abs(u_wind), 2) );
+                offset  = Math.atan2( v_wind, u_wind ) * degrees; // Is an offset from {below} value.
+                heading = ( 270 + offset ) - 180; // Proper direction - Pretty damned critical.
+                speed   = Math.sqrt( Math.pow(Math.abs(v_wind), 2) + Math.pow(Math.abs(u_wind), 2) );
 
                 // Can I be moved into primary loop via callback of any sort?
                 newPoints = position.travel(table[table.length - 2 ], speed * 60, heading);

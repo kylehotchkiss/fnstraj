@@ -1,7 +1,7 @@
 /**
  *
  * fnstraj | fnstraj loop
- * Copyright 2011-2012 Hotchkissmade
+ * Copyright 2011-2013 Hotchkissmade
  * Released under the GPL
  *
  * Logic flow is fairly consise, don't read too much into the parameters,
@@ -10,8 +10,6 @@
  * program control here. Flow also flies around async.whilst a bit, which is
  * explained well enough below.
  *
- * fnstraj.vertPred - Quick predictor for time-tracking purposes.
- * fnstraj.predict - fnstraj (linear) predictor loop
  *
  */
 var async    = require('async');
@@ -22,71 +20,45 @@ var position = require('./position.js');
 
 
 
-//////////////////////////////////////
-// Vertical Predictor (Frame Count) //
-//////////////////////////////////////
-exports.vertPred = function( launchAlt, burstAlt, radius, lift ) {
-    var table     = [ launchAlt ];
-    var flying    = true;
-    var status    = "ascending";
-    var altitude  = launchAlt;
-
-    while ( flying ) {
-        if ( status === "ascending") {
-            var ascended = position.ascend( table[ table.length - 1 ], burstAlt, lift, radius );
-            var currAlt = ( ascended * 60 ) + altitude;
-
-            if ( currAlt >= burstAlt ) {
-                status = "descending";
-            } else {
-                altitude = currAlt;
-                table[ table.length ] = altitude;
-            }
-        } else if ( status === "descending") {
-            var descended = 5; //position.descend( table[ frame - 1], 2267, 1.52);
-            var currAlt = altitude - ( descended * 60 );
-
-            if ( currAlt < 0 ) {
-                status = "landed";
-                flying = false;
-            } else {
-                altitude = currAlt;
-                table[ table.length ] = altitude;
-            }
-        }
-    }
-
-    return table.length;
-}
-
-
-
 ///////////////////////////////////
 // fnstraj Linear Predictor Loop //
 ///////////////////////////////////
 exports.predict = function( flight ) {
+    ////////////////////
+    // Initialization //
+    ////////////////////
     var cache = [],
-        stats = { frames: 0, gradsHits: 0, cacheHits: 0 },
+        stats = { frames: 0, gradsHits: 0, cacheHits: 0, startTime: new Date().getTime() },
         table = [{ latitude: flight.launch.latitude, longitude: flight.launch.longitude, altitude: flight.launch.altitude }];
 
     flight.flying = true;
     flight.status = "ascending";
 
-    if ( typeof flight.options.model !== "undefined" ) {
-        if ( flight.options.model !== "rap" || flight.options.model !== "gfs" || flight.options.model != "gfshd" ) {
-            flight.options.model = "gfs"; // Make this "auto" in the future
-        }
+
+
+    ////////////////////////
+    // Options Processing //
+    ////////////////////////
+    if ( typeof flight.options.model === "undefined" || (( flight.options.model !== "rap" && flight.options.model !== "gfs" && flight.options.model != "gfshd" ))) {
+        flight.options.model = "gfs";
     }
 
-    console.log("\033[1;34m\n FNSTRAJ BALLOON TRAJECTORY PREDICTOR\033[0m\n\n Using the " + flight.options.model + " weather model.\n\n \033[1;37mGenerating flight path (this will take several minutes)...\n\033[0m ");
+
+
+    //////////////////////////////////////////
+    // Pretty-printed Console Notifications //
+    //////////////////////////////////////////
+    console.log("\033[1;34m\n FNSTRAJ BALLOON TRAJECTORY PREDICTOR\033[0m\n");
+    console.log(" Using the NOAA " + flight.options.model + " weather model.\n");
+    console.log("\033[1;37m Generating flight path (this will take several minutes)...\n\033[0m ");
+
+
 
     async.whilst(
         ////////////////////
         // LOOP CONDITION //
         ////////////////////
-        function () {
-            return flight.flying;
-        },
+        function() { return flight.flying; },
 
 
 
@@ -105,12 +77,12 @@ exports.predict = function( flight ) {
 
                     stats.frames++;
 
-                    grads.wind( table[table.length - 2 ], timestep, flight.options.model, table, cache, stats, callback ); // Variable me!
+                    grads.wind( table[table.length - 2 ], timestep, flight, table, cache, stats, callback ); // Variable me!
                 } else {
-                    //
-                    // Burst
-                    // Logic flow: transision to descent mode.
-                    //
+                    /////////////////////////////////////////////
+                    // BURST                                   //
+                    // Logic flow: transision to descent mode. //
+                    /////////////////////////////////////////////
                     flight.points = {
                         burst: { latitude: table[table.length - 1].latitude, longitude: table[table.length - 1].longitude, altitude: table[table.length - 1].altitude }
                     };
@@ -128,16 +100,22 @@ exports.predict = function( flight ) {
 
                     stats.frames++;
 
-                    grads.wind( table[table.length - 2 ], timestep, flight.options.model, table, cache, stats, callback ); // Variable me!
+                    grads.wind( table[table.length - 2 ], timestep, flight, table, cache, stats, callback ); // Variable me!
                 } else {
-                    //
-                    // Landing
-                    // Logic flow: calculation complete, finalize.
-                    //
+                    /////////////////////////////////////////////////
+                    // LANDING                                     //
+                    // Logic flow: calculation complete, finalize. //
+                    /////////////////////////////////////////////////
                     flight.flying = false;
 
                     process.nextTick(function() {
-                        output.writeFiles(table, callback);
+                        stats.endTime = new Date().getTime();
+                        stats.predictorTime = (( stats.endTime - stats.startTime ) / 1000) + "s";
+                        delete stats.endTime; delete stats.startTime;
+
+                        console.log(" " + JSON.stringify(stats) + "\n");
+
+                        output.writeFiles(flight, table, callback);
                     });
                 }
             }

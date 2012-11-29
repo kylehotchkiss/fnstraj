@@ -16,18 +16,19 @@ if ( process.argv.length >= 4 ) {
     latitude  = sanitize(process.argv[2]).toFloat();
     longitude = sanitize(process.argv[3]).toFloat();
 
-    altitude  = sanitize(process.argv[4]).toFloat() || 0;
-    bRadius   = sanitize(process.argv[5]).toFloat() || 8;
-    lift      = sanitize(process.argv[6]).toFloat() || 1.359;
-    burst     = sanitize(process.argv[7]).toFloat() || 30000;
-    size      = sanitize(process.argv[8]).toFloat() || 0;
-    weight    = sanitize(process.argv[9]).toFloat() || 0;
+    model     = process.argv[4] || "gfs";
+    altitude  = sanitize(process.argv[5]).toFloat() || 0;
+    bRadius   = sanitize(process.argv[6]).toFloat() || 8;
+    lift      = sanitize(process.argv[7]).toFloat() || 1.359;
+    burst     = sanitize(process.argv[8]).toFloat() || 30000;
+    size      = sanitize(process.argv[9]).toFloat() || 0;
+    weight    = sanitize(process.argv[10]).toFloat() || 0;
 
     flight = {
         options: {
-            model: "gfs"
+            model: model,
+            resolution: 1
         },
-
         launch: {
             latitude: sanitize(latitude).toFloat(),
             longitude: sanitize(longitude).toFloat(),
