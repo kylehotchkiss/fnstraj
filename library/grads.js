@@ -25,16 +25,14 @@ var position = require('./position.js');
 
 
 exports.wind = function( frame, time, flight, table, cache, stats, parentCallback ) {
-    var gfs_hourset, gfs_offset, now, lev, u_ext, v_ext;
+    var gfs_hourset, gfs_offset, lev, u_ext, v_ext;
+    var now     = new Date( time );
+    var launch  = new Date( flight.launch.timestamp );
     var radians = Math.PI / 180;
     var degrees = 180 / Math.PI;
     var model   = flight.options.model;
     var baseURL = "http://nomads.ncep.noaa.gov:9090/dods/";
 
-
-
-    now = new Date( time );
-    now.setHours( now.getHours() - 5 ); // Probably timezone related fix? Does this need to choose the timezone? Should we not use GMT below?
 
 
 
@@ -57,10 +55,15 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
 
 
 
-    //////////////////////////////////
-    // Offset Determination for RAP //
-    //////////////////////////////////
-    var rap_offset = Math.round(( now.getUTCMinutes() / 60) * 18 );
+    ////////////////////////////////////////////
+    // Hourset & Offset Determination for RAP //
+    ////////////////////////////////////////////
+    if ( model === "rap" ) {
+        rap_offset = 3 + ( now.getHours() - launch.getHours() );
+
+        rap_hourset = launch.getHours() - 2; // It seems 2 hours may be the RAP offset, or we may be limited to an 18 hour set. We can account for a limitation
+        rap_hourset = ( rap_hourset < 10 ) ? "0" + rap_hourset : rap_hourset;
+    }
 
 
 
@@ -68,19 +71,20 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determinaion for GFS(HD) //
     ///////////////////////////////////////////////
     if ( model === "gfs" || model === "gfshd" ) {
-        var hour = now.getUTCHours();
+        var thisHour   = now.getHours();
+        var launchHour = launch.getHours();
 
-        if ( hour < 6 ) {
+        if ( launchHour <= 6 ) {
             gfs_hourset = 0;
-        } else if ( hour >= 6 && hour < 12 ) {
+        } else if ( launchHour > 6 && launchHour <= 12 ) {
             gfs_hourset = 6;
-        } else if ( hour >= 12 && hour < 18 ) {
+        } else if ( launchHour > 12 && launchHour <= 18 ) {
             gfs_hourset = 12;
-        } else if ( hour >= 18 && hour < 24 ) {
+        } else if ( launchHour > 18 && launchHour <= 24 ) {
             gfs_hourset = 18;
         }
 
-        gfs_offset = Math.round(( hour - gfs_hourset ) / 3);
+        gfs_offset = Math.round(( thisHour - gfs_hourset ) / 3);
         gfs_hourset = ( gfs_hourset < 10 ) ? "0" + gfs_hourset : gfs_hourset;
     }
 
@@ -89,10 +93,10 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     ///////////////////////////
     // Date/Time Corrections //
     ///////////////////////////
-    var year  = now.getUTCFullYear();
-    var month = ( now.getUTCMonth() < 9 ) ? "0" + ( now.getUTCMonth() + 1 ) : ( now.getUTCMonth() + 1); // wtf why is this one month in the future
-    var date  = ( now.getUTCDate() < 10 ) ? "0" + now.getUTCDate() : now.getUTCDate(); // Check this on the 10th of the month (appears fine)
-    var hour  = ( now.getUTCHours() < 10 ) ? "0" + now.getUTCHours() : now.getUTCHours(); // Check this on the 10th hour (utc?)
+    var year  = now.getFullYear();
+    var month = ( now.getMonth() < 9 ) ? "0" + ( now.getMonth() + 1 ) : ( now.getMonth() + 1); // wtf why is this one month in the future
+    var date  = ( now.getDate() < 10 ) ? "0" + now.getDate() : now.getDate(); // Check this on the 10th of the month (appears fine)
+    var hour  = ( now.getHours() < 10 ) ? "0" + now.getHours() : now.getHours(); // Check this on the 10th hour (utc?)
 
 
 
@@ -102,7 +106,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     if ( model === "rap" ) {
         latitude  = Math.floor((( frame.latitude - 16.281 ) / ( 58.02525454545 )) * 226 ); // WRONG.
         longitude = Math.floor((( -139.85660300000 - ( frame.longitude + 57.69083517955 )) / -139.85660300000 ) * 427 ); // WRONG.
-        modelURL = "rap/rap" + year + month + date + "/rap_" + hour + "z.ascii?";
+        modelURL = "rap/rap" + year + month + date + "/rap_" + rap_hourset + "z.ascii?";
 
 
 
@@ -247,6 +251,8 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
             } else {
                 v_url = url.parse(baseURL + modelURL + v_ext);
                 v_res = "";
+
+                console.log(v_url);
 
                 v_req = http.get({
                     hostname: v_url.hostname,

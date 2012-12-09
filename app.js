@@ -13,16 +13,26 @@ if ( process.argv.length >= 4 ) {
     //
     // Required
     //
-    latitude  = sanitize(process.argv[2]).toFloat();
-    longitude = sanitize(process.argv[3]).toFloat();
+    var latitude  = sanitize(process.argv[2]).toFloat();
+    var longitude = sanitize(process.argv[3]).toFloat();
 
-    model     = process.argv[4] || "gfs";
-    altitude  = sanitize(process.argv[5]).toFloat() || 0;
-    bRadius   = sanitize(process.argv[6]).toFloat() || 8;
-    lift      = sanitize(process.argv[7]).toFloat() || 1.359;
-    burst     = sanitize(process.argv[8]).toFloat() || 30000;
-    size      = sanitize(process.argv[9]).toFloat() || 0;
-    weight    = sanitize(process.argv[10]).toFloat() || 0;
+    //
+    // Other Options
+    //
+    var model     = process.argv[4] || "gfs";
+    var altitude  = sanitize(process.argv[5]).toFloat() || 0;
+    var bRadius   = sanitize(process.argv[6]).toFloat() || 8;
+    var lift      = sanitize(process.argv[7]).toFloat() || 1.359;
+    var burst     = sanitize(process.argv[8]).toFloat() || 30000;
+    var size      = sanitize(process.argv[9]).toFloat() || 0;
+    var weight    = sanitize(process.argv[10]).toFloat() || 0;
+
+
+    //
+    // Date Setup
+    //
+    var now = new Date();
+    var utc = now.getTime() + ( now.getTimezoneOffset() * 60000 );
 
     flight = {
         options: {
@@ -33,7 +43,7 @@ if ( process.argv.length >= 4 ) {
             latitude: sanitize(latitude).toFloat(),
             longitude: sanitize(longitude).toFloat(),
             altitude: sanitize(altitude).toFloat(),
-            timestamp: new Date().getTime()
+            timestamp: utc
         },
         balloon: {
             radius: bRadius,
