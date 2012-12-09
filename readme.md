@@ -6,7 +6,7 @@ This is the hardest thing I've ever done.  Node.js-based balloon trajectory pred
 1. You'll need Node.js and Google Earth to test.
 2. Fork this repo.
 3. `npm install` in the directory.
-4. `node app.js [your latitude] [your longitude] [your altitude]`
+4. `node app.js [your latitude] [your longitude]`
 5. You will either get an error message or see a list of coordinates. If you see an error message that says something about a time offset, and you don't live in the EST/EDT timezone, please leave a bug report, as I think this may be a bug. If you see a list of coordinates, look in your `exports/` folder, double click the KML - TADA, kinda a trajectory :)
 
 

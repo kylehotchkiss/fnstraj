@@ -1,6 +1,6 @@
 {
-    "name": "fnstraj",    
-    "version": "0.2",
+    "name": "fnstraj",
+    "version": "0.3",
     "author": "Hotchkissmade <hello@hotchkissmade.com>",
     "description": "Trajectory Predictor",
     "dependencies": {

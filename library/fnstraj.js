@@ -70,7 +70,7 @@ exports.predict = function( flight ) {
 
             if ( flight.status === "ascending" ) {
                 var ascended = 5;//position.ascend( table[table.length - 1].altitude, flight.balloon.burst, flight.balloon.lift, flight.balloon.radius );
-                var currAlt = ( ascended * 60 ) + table[table.length - 1].altitude;
+                var currAlt = ( ascended * 60 ) + table[table.length - 1].altitude; // CONSTANT TO VARIABLE: Percision
 
                 if ( currAlt < flight.balloon.burst ) {
                     table[table.length] = { altitude: currAlt };
@@ -89,18 +89,18 @@ exports.predict = function( flight ) {
 
                     flight.status = "descending";
 
-                    callback(); // Blank return - Yikes. Eval this.
+                    callback();
                 }
             } else if ( flight.status === "descending" ) {
                 var descended = 5;
-                var currAlt = table[table.length - 1].altitude - ( descended * 60 );
+                var currAlt = table[table.length - 1].altitude - ( descended * 60 ); // CONSTANT TO VARIABLE: Percision
 
                 if ( currAlt > 0 ) {
                     table[table.length] = { altitude: currAlt };
 
                     stats.frames++;
 
-                    grads.wind( table[table.length - 2 ], timestep, flight, table, cache, stats, callback ); // Variable me!
+                    grads.wind( table[table.length - 2 ], timestep, flight, table, cache, stats, callback );
                 } else {
                     /////////////////////////////////////////////////
                     // LANDING                                     //
@@ -109,6 +109,9 @@ exports.predict = function( flight ) {
                     flight.flying = false;
 
                     process.nextTick(function() {
+                        ///////////////////////
+                        // Timer and Outputs //
+                        ///////////////////////
                         stats.endTime = new Date().getTime();
                         stats.predictorTime = (( stats.endTime - stats.startTime ) / 1000) + "s";
                         delete stats.endTime; delete stats.startTime;
