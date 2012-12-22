@@ -53,7 +53,9 @@ if ( process.argv.length >= 4 ) {
         parachute: {
             radius: size,
             weight: 0
-        }
+        },
+
+        debug: true
     };
 
     fnstraj.predict( flight );

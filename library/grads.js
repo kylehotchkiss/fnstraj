@@ -71,20 +71,33 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determinaion for GFS(HD) //
     ///////////////////////////////////////////////
     if ( model === "gfs" || model === "gfshd" ) {
+        //
+        // Intermeittent issues with when NOAA actually releases hoursets
+        // It looks like they're five hours behind on releasing them... ugh why
+        //
+        //
         var thisHour   = now.getHours();
         var launchHour = launch.getHours();
 
-        if ( launchHour <= 6 ) {
+
+        if ( launchHour <= 5 ) {
+            //
+            // Time travel, this puts us 1 day in the past
+            //
+            now.setDate( now.getDate() - 1 ); // might break on the first day of the month
+            
+            gfs_hourset = 18;
+        } else if ( launchHour > 5 && launchHour <= 11 ) {
             gfs_hourset = 0;
-        } else if ( launchHour > 6 && launchHour <= 12 ) {
+        } else if ( launchHour > 11 && launchHour <= 17 ) {
             gfs_hourset = 6;
-        } else if ( launchHour > 12 && launchHour <= 18 ) {
+        } else if ( launchHour > 17 && launchHour <= 23 ) {
             gfs_hourset = 12;
-        } else if ( launchHour > 18 && launchHour <= 24 ) {
+        } else {
             gfs_hourset = 18;
         }
 
-        gfs_offset = Math.round(( thisHour - gfs_hourset ) / 3);
+        gfs_offset = thisHour - gfs_hourset; // will break between 5am and 10am est currently
         gfs_hourset = ( gfs_hourset < 10 ) ? "0" + gfs_hourset : gfs_hourset;
     }
 
@@ -219,6 +232,10 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 u_url = url.parse(baseURL + modelURL + u_ext);
                 u_res = "";
 
+                if ( flight.debug ) {
+                    console.log( " HIT: " + modelURL + u_ext );
+                }
+
                 u_req = http.get({
                     hostname: u_url.hostname,
                     path: u_url.path
@@ -252,7 +269,9 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 v_url = url.parse(baseURL + modelURL + v_ext);
                 v_res = "";
 
-                console.log(v_url);
+                if ( flight.debug ) {
+                    console.log( " HIT: " + modelURL + v_ext );
+                }
 
                 v_req = http.get({
                     hostname: v_url.hostname,

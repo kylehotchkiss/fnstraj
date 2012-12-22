@@ -1,3 +1,3 @@
 ## TODO
-
-- RAP time mapping is wrong. Go two hours back, then use the 1hr mapping.
+- Real climb/fall physics
+- Database and Heroku Worker interface
