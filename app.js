@@ -55,7 +55,7 @@ if ( process.argv.length >= 4 ) {
             weight: 0
         },
 
-        debug: true
+        debug: false
     };
 
     fnstraj.predict( flight );
