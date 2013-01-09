@@ -1,7 +1,7 @@
 /**
  *
  * fnstraj | GrADS Functions
- * Copyright 2011-2012 Hotchkissmade
+ * Copyright 2011-2013 Hotchkissmade
  * Released under the GPL
  *
  * grads.wind - return wind speed and direction.
@@ -290,7 +290,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
         }
     }, function( error, results ) {
         if ( error ) {
-            console.log("\033[0;31mgradsfail: Request Error (can you reach http://nomads.ncep.noaa.gov:9090/ ?)\033[0m");
+            console.log("\033[0;31m gradsfail: \n  Request Error (can you reach http://nomads.ncep.noaa.gov:9090/ ?)\033[0m");
 
             parentCallback( error );
         } else {

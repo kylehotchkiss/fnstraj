@@ -1,7 +1,7 @@
 /**
  *
  * fnstraj | Executible
- * Copyright 2011-2012 Hotchkissmade
+ * Copyright 2011-2013 Hotchkissmade
  * Released under the GPL
  *
  */
@@ -55,6 +55,7 @@ if ( process.argv.length >= 4 ) {
             weight: 0
         },
 
+        context: "terminal",
         debug: false
     };
 

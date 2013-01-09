@@ -93,7 +93,7 @@ exports.predict = function( flight ) {
                 }
             } else if ( flight.status === "descending" ) {
                 var descended = 5;
-                var currAlt = table[table.length - 1].altitude - ( descended * 60 ); // CONSTANT TO VARIABLE: Percision
+                var currAlt = table[table.length - 1].altitude - ( descended * 60 ); // CONSTANT TO VARIABLE: Precision
 
                 if ( currAlt > 0 ) {
                     table[table.length] = { altitude: currAlt };

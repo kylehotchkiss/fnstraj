@@ -1,7 +1,7 @@
 /**
 *
 * fnstraj | exports
-* Copyright 2011-2012 Hotchkissmade
+* Copyright 2011-2013 Hotchkissmade
 * Released under the GPL
 *
 */
@@ -18,6 +18,9 @@ exports.writeFiles = function( flight, table, parentCallback ) {
 		//
 		// Just throw in any other output functions
 		// below and then add them to this array.
+		//
+		// SaaS: run outputs based on context.
+		//
 		//
 		function( callback ) {
 			exports.writeCSV( flight, table, callback );
@@ -120,6 +123,7 @@ exports.writeKML = function( flight, table, callback ) {
 }
 
 
+
 ///////////////////////////////////////
 // JSON (fnstraj file format) EXPORT //
 ///////////////////////////////////////
@@ -135,4 +139,15 @@ exports.writeJSON = function( flight, table, callback ) {
 		}
 	});
 
+}
+
+
+
+////////////////////////////////
+// DATABASE (Cloudant) EXPORT //
+////////////////////////////////
+exports.writeDatabase = function ( flight, table, callback ) {
+
+	
+	
 }

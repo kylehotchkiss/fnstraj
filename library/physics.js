@@ -1,7 +1,7 @@
 /**
  *
  * fnstraj | Physics Functions
- * Copyright 2011-2012 Hotchkissmade
+ * Copyright 2011-2013 Hotchkissmade
  * Released under the GPL
  *
  * physics.density - get the density (kg/cu m^2) for altitude
