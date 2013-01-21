@@ -1,7 +1,7 @@
 /**
 *
 * fnstraj | exports
-* Copyright 2011-2013 Hotchkissmade
+* Copyright 2011-2013 Kyle Hotchkiss
 * Released under the GPL
 *
 */
@@ -50,7 +50,7 @@ exports.writeFiles = function( flight, table, parentCallback ) {
 ////////////////////////////////////////
 exports.writeCSV = function( flight, table, callback ) {
 	var fileContents = "";
-	
+
 	var flightID = flight.options.flightID;
 
 	for ( i = 0; i < table.length; i++ ) {
@@ -74,7 +74,7 @@ exports.writeCSV = function( flight, table, callback ) {
 ///////////////////////////////
 exports.writeKML = function( flight, table, callback ) {
 	var color;
-		
+
 	var model = flight.options.model;
 	var flightID = flight.options.flightID;
 
@@ -162,21 +162,21 @@ exports.writeDatabase = function ( flight, table, callback ) {
 	//
 	// CouchDB Compliant / Cloudant Compatible
 	//
-	
+
 	var flightID = flight.options.flightID;
 	var database = { parameters: flight, prediction: [table] };
-	
-	
+
+
 	var db_host = process.env.COUCHDB_HOST;
 	var db_port = process.env.COUCHDB_PORT;
 	var db_user = process.env.COUCHDB_USER;
 	var db_pass = process.env.COUCHDB_PASS;
-	
-	
+
+
 	var couchdb = http.request({
 		auth: 		db_user + ":" + db_pass,
 		host: 		db_host,
-		port: 		db_port,                   		
+		port: 		db_port,
 		headers: 	{ "Content-Type": "application/json" },
 		method: 	"PUT",
 		path: 		"/flights/" + flightID,
@@ -186,8 +186,8 @@ exports.writeDatabase = function ( flight, table, callback ) {
 		console.log("  databasefail: " + error.message);
 		callback( true );
 	});
-		
-			
+
+
 	//
 	// Logic flow: Aync.js or nest these?
 	//

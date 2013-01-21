@@ -1,7 +1,7 @@
 /**
  *
  * fnstraj | fnstraj loop
- * Copyright 2011-2013 Hotchkissmade
+ * Copyright 2011-2013 Kyle Hotchkiss
  * Released under the GPL
  *
  * Logic flow is fairly consise, don't read too much into the parameters,

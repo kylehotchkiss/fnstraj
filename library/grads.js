@@ -1,7 +1,7 @@
 /**
  *
  * fnstraj | GrADS Functions
- * Copyright 2011-2013 Hotchkissmade
+ * Copyright 2011-2013 Kyle Hotchkiss
  * Released under the GPL
  *
  * grads.wind - return wind speed and direction.

@@ -1,7 +1,7 @@
 /**
  *
  * fnstraj | Executible
- * Copyright 2011-2013 Hotchkissmade
+ * Copyright 2011-2013 Kyle Hotchkiss
  * Released under the GPL
  *
  */
@@ -42,7 +42,7 @@ if ( process.argv.length >= 4 ) {
         //
         options: {
             debug:      false,
-            context:    "terminal",            
+            context:    "terminal",
             flightID:   "123456789",
             model:      model,
             resolution: 1

@@ -1,7 +1,7 @@
 {
     "name": "fnstraj",
     "version": "0.3",
-    "author": "Hotchkissmade <hello@hotchkissmade.com>",
+    "author": "Kyle Hotchkiss <kyle@kylehotchkiss.com>",
     "description": "Trajectory Predictor",
     "dependencies": {
         "async":  "0.1.x",

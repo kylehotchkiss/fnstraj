@@ -1,7 +1,7 @@
 /**
  *
  * fnstraj | Position Functions
- * Copyright 2011-2013 Hotchkissmade
+ * Copyright 2011-2013 Kyle Hotchkiss
  * Released under the GPL
  *
  * position.travel   - Travel from point, get new coordinates.
