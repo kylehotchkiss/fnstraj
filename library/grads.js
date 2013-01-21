@@ -83,7 +83,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
             // Time travel, this puts us 1 day in the past
             //
             now.setDate( now.getDate() - 1 ); // might break on the first day of the month
-            
+
             gfs_hourset = 18;
         } else if ( launchHour > 5 && launchHour <= 11 ) {
             gfs_hourset = 0;
@@ -293,7 +293,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
         }
     }, function( error, results ) {
         if ( error ) {
-            console.log("\n\033[0;31m gradsfail: \n  Request Error (can you reach http://nomads.ncep.noaa.gov:9090/ ?)\033[0m");
+            console.log("\n\033[0;31m GrADS Fail: \n  Request Error (can you reach http://nomads.ncep.noaa.gov:9090/ ?)\033[0m");
 
             parentCallback( error );
         } else {
@@ -307,31 +307,31 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 // What's that? your innocent mind ponders. It's the end,
                 // I answer, wallowing in all my lost predictions.
                 //
-                console.log("\n\033[1;31m gradsfail:\033[0m");
-                
+                console.log("\n\033[1;31m GrADS Fail:\033[0m");
+
                 var u_errorStart = results.u_wind.indexOf("because of the following error:<p>\n<b>") + 38;
                 var u_errorEnd   = results.u_wind.indexOf("</b><p>\nCheck the syntax of your request,");
                 var v_errorStart = results.u_wind.indexOf("because of the following error:<p>\n<b>") + 38;
-                var v_errorEnd   = results.u_wind.indexOf("</b><p>\nCheck the syntax of your request,"); 
-                
+                var v_errorEnd   = results.u_wind.indexOf("</b><p>\nCheck the syntax of your request,");
+
                 var errorShown = false;
-                
+
                 if ( u_errorStart !== -1 && u_errorEnd !== -1 ) {
                     var u_error = results.u_wind.substring(u_errorStart, u_errorEnd);
-                    console.log("\033[0;31m   " + u_error + " \033[0m");             
+                    console.log("\033[0;31m   " + u_error + " \033[0m");
                     errorShown = true;
                 }
-                
-                if ( v_errorStart !== -1 && v_errorEnd !== -1 ) {
+
+                if ( v_errorStart !== -1 && v_errorEnd !== -1 && errorShown === false ) {
                     var v_error = results.v_wind.substring(v_errorStart, v_errorEnd);
                     console.log("\033[0;31m   " + v_error + " \033[0m\n");
                     errorShown = true;
                 }
-                
+
                 if ( !errorShown ) {
-                    console.log("\033[0;31m   Unknown Error. \033[0m");  
-                } 
-                
+                    console.log("\033[0;31m   Unknown Error. \033[0m");
+                }
+
                 parentCallback( true );
             } else {
                 cache[u_ext] = results.u_wind;
