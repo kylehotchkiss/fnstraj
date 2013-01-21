@@ -5,16 +5,17 @@
 * Released under the GPL
 *
 */
-var fs    = require('fs');
-var http  = require('http');
-var async = require('async');
+var fs       = require('fs');
+var http     = require('http');
+var async    = require('async');
+var database = require('./database.js')
 
 
 
 ////////////////////////////////////////
 // MODULAR FILE EXPORTS (in parallel) //
 ////////////////////////////////////////
-exports.writeFiles = function( flight, table, parentCallback ) {
+exports.export = function( flight, table, stats, parentCallback ) {
 	async.parallel([
 		//
 		// Just throw in any other output functions
@@ -162,11 +163,16 @@ exports.writeDatabase = function ( flight, table, callback ) {
 	//
 	// CouchDB Compliant / Cloudant Compatible
 	//
+	// MOVE TO DATABASE.JS SUPPORT
+	//
 
 	var flightID = flight.options.flightID;
 	var database = { parameters: flight, prediction: [table] };
 
-
+	//
+	// Grab environmental variables
+	// (for sensitive information only)
+	//
 	var db_host = process.env.COUCHDB_HOST;
 	var db_port = process.env.COUCHDB_PORT;
 	var db_user = process.env.COUCHDB_USER;
@@ -174,12 +180,12 @@ exports.writeDatabase = function ( flight, table, callback ) {
 
 
 	var couchdb = http.request({
-		auth: 		db_user + ":" + db_pass,
-		host: 		db_host,
-		port: 		db_port,
-		headers: 	{ "Content-Type": "application/json" },
-		method: 	"PUT",
-		path: 		"/flights/" + flightID,
+		auth:		db_user + ":" + db_pass,
+		host:		db_host,
+		port:		db_port,
+		headers:	{ "Content-Type": "application/json" },
+		method:		"PUT",
+		path:		"/flights/" + flightID,
 	}, function() {
 		callback();
 	}).on("error", function( error ) {
@@ -193,4 +199,12 @@ exports.writeDatabase = function ( flight, table, callback ) {
 	//
 	couchdb.write( JSON.stringify(database) );
 	couchdb.end();
+}
+
+
+///////////////////////////////
+// LOG AND STATISTICS EXPORT //
+///////////////////////////////
+exports.writeLog = function ( flight, stats, callback ) {
+
 }

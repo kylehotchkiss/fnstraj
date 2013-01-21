@@ -41,7 +41,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     ////////////////////////////
     for ( var i = 0; i < arguments.length; i++ ) {
         if ( arguments[i] === null || arguments === NaN ) {
-            console.log("\033[0;31mlogicfail: NULL caught/grads.js.\033[0m");
+            console.log("\033[1;31m  logicfail:\n   NULL caught/grads.js.\033[0m\n");
 
             parentCallback( true );
 
@@ -293,7 +293,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
         }
     }, function( error, results ) {
         if ( error ) {
-            console.log("\n\033[0;31m GrADS Fail: \n  Request Error (can you reach http://nomads.ncep.noaa.gov:9090/ ?)\033[0m");
+            console.log("\n\033[0;31m GrADS Fail: \n  Request Error (can you reach http://nomads.ncep.noaa.gov:9090/ ?)\033[0m\n");
 
             parentCallback( error );
         } else {
@@ -318,18 +318,18 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
 
                 if ( u_errorStart !== -1 && u_errorEnd !== -1 ) {
                     var u_error = results.u_wind.substring(u_errorStart, u_errorEnd);
-                    console.log("\033[0;31m   " + u_error + " \033[0m");
+                    console.log("\033[0;31m   " + u_error + "\033[0m\n");
                     errorShown = true;
                 }
 
                 if ( v_errorStart !== -1 && v_errorEnd !== -1 && errorShown === false ) {
                     var v_error = results.v_wind.substring(v_errorStart, v_errorEnd);
-                    console.log("\033[0;31m   " + v_error + " \033[0m\n");
+                    console.log("\033[0;31m   " + v_error + "\033[0m\n");
                     errorShown = true;
                 }
 
                 if ( !errorShown ) {
-                    console.log("\033[0;31m   Unknown Error. \033[0m");
+                    console.log("\033[0;31m    Unknown Error.\033[0m");
                 }
 
                 parentCallback( true );

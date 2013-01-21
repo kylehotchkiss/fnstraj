@@ -23,7 +23,7 @@ var position = require('./position.js');
 ///////////////////////////////////
 // fnstraj Linear Predictor Loop //
 ///////////////////////////////////
-exports.predict = function( flight ) {
+exports.predict = function( flight, parentCallback ) {
     ////////////////////
     // Initialization //
     ////////////////////
@@ -113,6 +113,10 @@ exports.predict = function( flight ) {
                     /////////////////////////////////////////////////
                     flight.flying = false;
 
+                    if ( flight.options.context === "terminal") {
+                        console.log("\n   Predictor Complete - See exports/ for results!\n");
+                    }
+
                     process.nextTick(function() {
                         ///////////////////////
                         // Timer and Outputs //
@@ -130,7 +134,7 @@ exports.predict = function( flight ) {
                             console.log("\n   Stats: " + JSON.stringify(stats) + "\n");
                         }
 
-                        output.writeFiles(flight, table, callback);
+                        output.export(flight, table, stats, callback);
                     });
                 }
             }
@@ -145,6 +149,7 @@ exports.predict = function( flight ) {
             if ( error != null ) {
                 //
                 // Error... Do what you will.
+                // For queue-worker mode, this should globalCallback with an error
                 //
             }
         }
