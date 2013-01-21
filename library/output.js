@@ -6,6 +6,7 @@
 *
 */
 var fs    = require('fs');
+var http  = require('http');
 var async = require('async');
 
 
@@ -19,7 +20,7 @@ exports.writeFiles = function( flight, table, parentCallback ) {
 		// Just throw in any other output functions
 		// below and then add them to this array.
 		//
-		// SaaS: run outputs based on context.
+		// SaaS: run outputs based on context, or via options in primary file
 		//
 		//
 		function( callback ) {
@@ -32,6 +33,9 @@ exports.writeFiles = function( flight, table, parentCallback ) {
 
 		function( callback ) {
 			exports.writeJSON( flight, table, callback );
+		},
+		function( callback ) {
+			exports.writeDatabase( flight, table, callback );
 		}
 	], function( error, results ) {
 		parentCallback();
@@ -46,12 +50,14 @@ exports.writeFiles = function( flight, table, parentCallback ) {
 ////////////////////////////////////////
 exports.writeCSV = function( flight, table, callback ) {
 	var fileContents = "";
+	
+	var flightID = flight.options.flightID;
 
 	for ( i = 0; i < table.length; i++ ) {
 		fileContents += table[i].longitude + "," + table[i].latitude + "," + table[i].altitude + "\n";
 	}
 
-	fs.writeFile("exports/flight-name.csv", fileContents, function( error ) {
+	fs.writeFile("exports/flight-" + flightID + ".csv", fileContents, function( error ) {
 		if ( error ) {
 			callback( true );
 		} else {
@@ -68,7 +74,9 @@ exports.writeCSV = function( flight, table, callback ) {
 ///////////////////////////////
 exports.writeKML = function( flight, table, callback ) {
 	var color;
+		
 	var model = flight.options.model;
+	var flightID = flight.options.flightID;
 
 	if ( model === "rap" ) {
 		color = "BDC5A7";
@@ -112,7 +120,7 @@ exports.writeKML = function( flight, table, callback ) {
 	</Document>\n\
 </kml>";
 
-	fs.writeFile("exports/flight-name." + model + ".kml", fileContents, function( error ) {
+	fs.writeFile("exports/flight-" + flightID + "." + model + ".kml", fileContents, function( error ) {
 		if ( error ) {
 			callback( true );
 		} else {
@@ -129,9 +137,10 @@ exports.writeKML = function( flight, table, callback ) {
 ///////////////////////////////////////
 exports.writeJSON = function( flight, table, callback ) {
 
+	var flightID = flight.options.flightID;
 	var fileContents = JSON.stringify( table );
 
-	fs.writeFile("exports/flight-name.json", fileContents, function( error ) {
+	fs.writeFile("exports/flight-" + flightID +".json", fileContents, function( error ) {
 		if ( error ) {
 			callback( true );
 		} else {
@@ -143,11 +152,45 @@ exports.writeJSON = function( flight, table, callback ) {
 
 
 
-////////////////////////////////
-// DATABASE (Cloudant) EXPORT //
-////////////////////////////////
+///////////////////////////////
+// DATABASE (Couchdb) EXPORT //
+///////////////////////////////
 exports.writeDatabase = function ( flight, table, callback ) {
-
+	//
+	// In the future, this will have to manually append for
+	// multiple prediction support.
+	//
+	// CouchDB Compliant / Cloudant Compatible
+	//
+	
+	var flightID = flight.options.flightID;
+	var database = { parameters: flight, prediction: [table] };
 	
 	
+	var db_host = process.env.COUCHDB_HOST;
+	var db_port = process.env.COUCHDB_PORT;
+	var db_user = process.env.COUCHDB_USER;
+	var db_pass = process.env.COUCHDB_PASS;
+	
+	
+	var couchdb = http.request({
+		auth: 		db_user + ":" + db_pass,
+		host: 		db_host,
+		port: 		db_port,                   		
+		headers: 	{ "Content-Type": "application/json" },
+		method: 	"PUT",
+		path: 		"/flights/" + flightID,
+	}, function() {
+		callback();
+	}).on("error", function( error ) {
+		console.log("  databasefail: " + error.message);
+		callback( true );
+	});
+		
+			
+	//
+	// Logic flow: Aync.js or nest these?
+	//
+	couchdb.write( JSON.stringify(database) );
+	couchdb.end();
 }

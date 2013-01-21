@@ -59,6 +59,9 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determination for RAP //
     ////////////////////////////////////////////
     if ( model === "rap" ) {
+        //
+        // Absolute value check maybe.
+        //
         rap_offset = 3 + ( now.getHours() - launch.getHours() );
 
         rap_hourset = launch.getHours() - 2; // It seems 2 hours may be the RAP offset, or we may be limited to an 18 hour set. We can account for a limitation
@@ -92,7 +95,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
             gfs_hourset = 18;
         }
 
-        gfs_offset = thisHour - gfs_hourset; // will break between 5am and 10am est currently
+        gfs_offset = thisHour - gfs_hourset; // will break between 5am and 10am est currently (s/n breaking at 7pm)
         gfs_hourset = ( gfs_hourset < 10 ) ? "0" + gfs_hourset : gfs_hourset;
     }
 
@@ -227,8 +230,8 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 u_url = url.parse(baseURL + modelURL + u_ext);
                 u_res = "";
 
-                if ( flight.debug ) {
-                    console.log( " HIT: " + modelURL + u_ext );
+                if ( flight.options.debug ) {
+                    console.log( "   HIT: " + modelURL + u_ext );
                 }
 
                 u_req = http.get({
@@ -264,8 +267,8 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 v_url = url.parse(baseURL + modelURL + v_ext);
                 v_res = "";
 
-                if ( flight.debug ) {
-                    console.log( " HIT: " + modelURL + v_ext );
+                if ( flight.options.debug ) {
+                    console.log( "   HIT: " + modelURL + v_ext );
                 }
 
                 v_req = http.get({
@@ -290,7 +293,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
         }
     }, function( error, results ) {
         if ( error ) {
-            console.log("\033[0;31m gradsfail: \n  Request Error (can you reach http://nomads.ncep.noaa.gov:9090/ ?)\033[0m");
+            console.log("\n\033[0;31m gradsfail: \n  Request Error (can you reach http://nomads.ncep.noaa.gov:9090/ ?)\033[0m");
 
             parentCallback( error );
         } else {
@@ -304,7 +307,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 // What's that? your innocent mind ponders. It's the end,
                 // I answer, wallowing in all my lost predictions.
                 //
-                console.log("\033[0;31m gradsfail:\033[0m");
+                console.log("\n\033[1;31m gradsfail:\033[0m");
                 
                 var u_errorStart = results.u_wind.indexOf("because of the following error:<p>\n<b>") + 38;
                 var u_errorEnd   = results.u_wind.indexOf("</b><p>\nCheck the syntax of your request,");
@@ -315,18 +318,18 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 
                 if ( u_errorStart !== -1 && u_errorEnd !== -1 ) {
                     var u_error = results.u_wind.substring(u_errorStart, u_errorEnd);
-                    console.log("\033[0;31m  " + u_error + " \033[0m");             
+                    console.log("\033[0;31m   " + u_error + " \033[0m");             
                     errorShown = true;
                 }
                 
                 if ( v_errorStart !== -1 && v_errorEnd !== -1 ) {
                     var v_error = results.v_wind.substring(v_errorStart, v_errorEnd);
-                    console.log("\033[0;31m  " + v_error + " \033[0m\n");
+                    console.log("\033[0;31m   " + v_error + " \033[0m\n");
                     errorShown = true;
                 }
                 
                 if ( !errorShown ) {
-                    console.log("\033[0;31m  Unknown Error. \033[0m");  
+                    console.log("\033[0;31m   Unknown Error. \033[0m");  
                 } 
                 
                 parentCallback( true );

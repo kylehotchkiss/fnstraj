@@ -35,28 +35,33 @@ if ( process.argv.length >= 4 ) {
     var utc = now.getTime() + ( now.getTimezoneOffset() * 60000 );
 
     flight = {
+        //
+        // Standardize Me :)
+        // My options should control most everything,
+        // but context will do for now.
+        //
         options: {
-            model: model,
+            debug:      false,
+            context:    "terminal",            
+            flightID:   "123456789",
+            model:      model,
             resolution: 1
         },
         launch: {
-            latitude: sanitize(latitude).toFloat(),
-            longitude: sanitize(longitude).toFloat(),
-            altitude: sanitize(altitude).toFloat(),
-            timestamp: utc
+            latitude:   sanitize(latitude).toFloat(),
+            longitude:  sanitize(longitude).toFloat(),
+            altitude:   sanitize(altitude).toFloat(),
+            timestamp:  utc
         },
         balloon: {
-            radius: bRadius,
-            lift: lift,
-            burst: burst
+            radius:     bRadius,
+            lift:       lift,
+            burst:      burst
         },
         parachute: {
-            radius: size,
-            weight: 0
-        },
-
-        context: "terminal",
-        debug: false
+            radius:     size,
+            weight:     0
+        }
     };
 
     fnstraj.predict( flight );

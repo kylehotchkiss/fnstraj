@@ -48,9 +48,14 @@ exports.predict = function( flight ) {
     //////////////////////////////////////////
     // Pretty-printed Console Notifications //
     //////////////////////////////////////////
-    console.log("\033[1;34m\n FNSTRAJ BALLOON TRAJECTORY PREDICTOR\033[0m\n");
-    console.log(" Using the NOAA " + flight.options.model + " weather model.\n");
-    console.log("\033[1;37m Generating flight path (this will take several minutes)...\n\033[0m ");
+    if ( flight.options.context === "terminal" ) {
+        console.log("\033[1;34m\n FNSTRAJ BALLOON TRAJECTORY PREDICTOR\033[0m");
+        console.log("   Generating flight path with NOAA " + flight.options.model + " (this will take several minutes)...\n");
+        
+        if ( flight.options.debug ) {
+            console.log("\033[1;37m URL root: http://nomads.ncep.noaa.gov:9090/dods/\033[0m");
+        }
+    }
 
 
 
@@ -114,9 +119,16 @@ exports.predict = function( flight ) {
                         ///////////////////////
                         stats.endTime = new Date().getTime();
                         stats.predictorTime = (( stats.endTime - stats.startTime ) / 1000) + "s";
+                        
+                        /////////////
+                        // Cleanup //
+                        /////////////
                         delete stats.endTime; delete stats.startTime;
-
-                        console.log(" " + JSON.stringify(stats) + "\n");
+                        delete flight.flying; delete flight.status;
+                        
+                        if ( flight.options.debug ) {
+                            console.log("\n   Stats: " + JSON.stringify(stats) + "\n");
+                        }
 
                         output.writeFiles(flight, table, callback);
                     });
@@ -131,7 +143,9 @@ exports.predict = function( flight ) {
         ///////////////////////////////
         function ( error ) {
             if ( error != null ) {
-                console.log("Closing");
+                //
+                // Error... Do what you will.
+                //
             }
         }
     );
