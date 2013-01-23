@@ -2,6 +2,9 @@
 
 This is the actual trajectory prediction code. This was the majority of the challenges to the project at first. Now they are much easier to grasp. I think I have them organized in a way that will help you understand what is going on. 
 
+### database.js
+This is a simple wrapper for accessing CouchDB databases via the Node.js HTTP module.
+
 ### fnstraj.js
 This is the primary trajectory predictor loop and logic flow for a normal, start-to-finish trajectory. It's a complex beast to understand, as it is written in async.js (which is a refreshing fix from hard-coding all that asynchronously). You'll need to read through the comments to see what each block is doing here. Being the logic flow controller, this is also where everything else that is happening is called from. 
 

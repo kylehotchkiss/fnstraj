@@ -134,7 +134,7 @@ exports.predict = function( flight, parentCallback ) {
                             console.log("\n   Stats: " + JSON.stringify(stats) + "\n");
                         }
 
-                        output.export(flight, table, stats, callback);
+                        output.export(flight, table, stats, parentCallback);
                     });
                 }
             }
@@ -151,6 +151,8 @@ exports.predict = function( flight, parentCallback ) {
                 // Error... Do what you will.
                 // For queue-worker mode, this should globalCallback with an error
                 //
+
+                parentCallback( error );
             }
         }
     );
