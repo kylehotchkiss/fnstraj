@@ -53,7 +53,7 @@ exports.predict = function( flight, parentCallback ) {
         console.log("   Generating flight path with NOAA " + flight.options.model + " (this will take several minutes)...");
 
         if ( flight.options.debug ) {
-            console.log("\033[1;37m URL root: http://nomads.ncep.noaa.gov:9090/dods/\033[0m");
+            console.log("\n\033[1;37m URL root: http://nomads.ncep.noaa.gov:9090/dods/\033[0m");
         }
     }
 

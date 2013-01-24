@@ -52,3 +52,7 @@ exports.coordsToCity = function( latitude, longitude, callback ) {
 		callback();
 	});
 }
+
+//
+// Email User
+//

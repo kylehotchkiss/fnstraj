@@ -4,10 +4,8 @@
  * Copyright 2011-2013 Kyle Hotchkiss
  * Released under the GPL
  *
- *
  * Garbage Collection based on process.nextTick(), but if possible,
  * we want to catch stack overflows and and see what happened.
- *
  *
  */
 
@@ -22,66 +20,86 @@ var database = require('./library/database.js');
 var daemon = function() {
 
 	database.read('/queue/', function( results, error ) {
-
 		if ( typeof error !== "undefined" && error ) {
+			//
+			// Queue is empty or DB is down. 
+			// Let's find out and act accordingly
+			//
 			sleep();
 		} else {
 			var queue = results.rows;
-
-			for ( item in queue ) {
-				console.log(queue[item].id);				
-			}
 			
-			// try-del
-			
-			database.remove('/queue/' + queue[0].id, queue[0].value.rev, function() {
+			if ( typeof queue === "object" && typeof queue[0] !== "undefined" ) {
+				var thisID		= queue[0].id; // pass this as the flight ID
+				var thisRev		= queue[0].value.rev;
+				// var thisFlight  = queue[0].document. // ??
 				
-				console.log("maybe it's removed");
+				var now = new Date();
+				var utc = now.getTime() + ( now.getTimezoneOffset() * 60000 );
 				
-			});
-
-			// FIFO select one.
-
-
-			/*var flight = {
+				var flight = {	
 					options: {
-						context:	"daemon",
-						flightID:	"123456789",
-						model:		model,
+						debug:      false,
+						context:    "terminal",
+						flightID:   "123456789",
+						model:      "rap",
 						resolution: 1
 					},
 					launch: {
-						latitude:	sanitize(latitude).toFloat(),
-						longitude:	sanitize(longitude).toFloat(),
-						altitude:	sanitize(altitude).toFloat(),
-						timestamp:	utc
+						latitude:   37.403672, 
+						longitude:  -79.170205,
+						altitude:   0,
+						timestamp:  utc
 					},
 					balloon: {
-						radius:	 bRadius,
-						lift:		lift,
-						burst:		burst
+						radius:     0,
+						lift:       0,
+						burst:      30000
 					},
 					parachute: {
-						radius:	 size,
-						weight:	 0
+						radius:     0,
+						weight:     0
 					}
-			};*/
-
-
-			/*fnstraj.predict( flight, function( error ) {
-				//
-				// WHERE ARE WE GETTING OUR FLIGHT DATA FROM?
-				//
-
-				if ( typeof error !== "undefined" && error ) {
-					sleep();
-				} else {
-					advance();
 				}
-			});*/
-
+				
+				fnstraj.predict( flight, function( error ) { 
+					
+					if ( typeof error !== "undefined" && error ) {
+						/////////////////////////////////////
+						// CASE: PREDICTION FAILED/FORWARD //
+						/////////////////////////////////////
+						
+						// log error
+						// email user
+						
+						// right now, this is breaking. Delete and report broken queue.
+						
+						database.remove('/queue/' + thisID, thisRev, function() { 
+							console.log("prediction was broken, deleting.")
+							
+							advance();
+						});	
+					} else {
+						////////////////////////////
+						// CASE: COMPLETE/FORWARD //
+						////////////////////////////
+						
+						// email user
+						
+						database.remove('/queue/' + thisID, thisRev, function() { // error handling?
+							advance();
+						});	
+					}
+					
+				});
+				
+			} else {
+				//////////////////////////////
+				// CASE: NO ENTRIES/FORWARD //
+				//////////////////////////////
+				sleep();
+			}
 		}
-
 	});
 
 
@@ -117,17 +135,24 @@ var advance = function() {
 // DAEMON SLEEP //
 //////////////////
 var sleep = function() {
+	console.log("Sleeping for a few...");
+	
 	setTimeout(function() {
-		console.log("Sleeping for a few...");
-
 		process.nextTick( function() {
 			daemon();
 		});
-	}, 300000); // 5min
+	}, 300000); // 5min, but needs to be envvar
 };
 
 
-///////////////////
-// Initalization //
-///////////////////
-daemon();
+
+///////////////////////////////
+// Initalization + Preflight //
+///////////////////////////////
+(function() {
+	//
+	// Check for
+	// 1) Database config 2) Sleep Config
+	//
+	daemon();	
+})();

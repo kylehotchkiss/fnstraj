@@ -14,6 +14,9 @@ This is the hardest thing I've ever done.  Node.js-based balloon trajectory pred
 I'm trying to take as minimalistic an approach towards feature cuft as possible. I would personally like to ensure that the core of this app is the highest quality work I am capable of producing. This code has been through two major rewrites before the alpha ever existed! if you would like to hack at the code, go for it! It's not my intension to bring every great feature upstream, but I would love to see what people can turn this codebase into and how they can make it work better for their personal flights and tracking purposes.
 
 
+## Environmental Variables
+Since fnstraj is designed to run as a service in some contexts, some configuration needs to be done via environmental variables. This includes database access information.
+
 ## Special Thanks
 * UKHAS, for your absolutely brilliant web resources on ballooning.
 * Wolfram Alpha, for always knowing the answer to "Air Pressure at 80,000ft".

@@ -5,6 +5,7 @@
  * Released under the GPL
  * 
  * Usage can be found in /defunct/ fnstraj code in Projects/Node.js
+ * Callbacks for errors need revise, only one var needed
  *
  */
  
@@ -62,6 +63,7 @@ exports.read = function( path, callback ) {
 // DATABASE WRITE REQUEST //
 ////////////////////////////
 exports.write = function( path, data, callback ) {
+    // Critical: Can't support ammends!
     exports.read( path, function( results ) {
         if ( !results.error ) {
             // Data is being rewriten - how do we change the URL?
@@ -98,8 +100,6 @@ exports.write = function( path, data, callback ) {
 // DATABASE DELETE REQUEST //
 /////////////////////////////
 exports.remove = function( path, rev, callback ) {
-    
-    
     var couchdb = http.request({
         auth: db_user + ":" + db_pass,
         host: db_host,
@@ -108,14 +108,12 @@ exports.remove = function( path, rev, callback ) {
         headers: { "If-Match": rev },
         method: "DELETE"
     }, function() {
-        console.log("Deleted");
-        
         if ( typeof callback !== "undefined") {
             callback();
         }
     }).on("error", function() {
-        if ( typeof callback !== "undefined") {
-            callback( false, true );
+        if ( typeof callback !== "undefined" ) {
+            callback( true );
         }
     });  
     
