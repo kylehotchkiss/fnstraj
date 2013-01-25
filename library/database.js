@@ -17,10 +17,10 @@ var http = require("http");
 //////////////////////////////////
 // GRAB ENVIRONMENTAL VARIABLES //
 //////////////////////////////////
-var db_host = process.env.CLOUDANT_HOST || "127.0.0.1";
-var db_port = process.env.CLOUDANT_PORT || 5984;
-var db_user = process.env.CLOUDANT_USER || "";
-var db_pass = process.env.CLOUDANT_PASS || "";
+var db_host = process.env.CLOUDANT_HOST;
+var db_port = process.env.CLOUDANT_PORT;
+var db_user = process.env.CLOUDANT_USER;
+var db_pass = process.env.CLOUDANT_PASS;
 
 
 

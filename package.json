@@ -1,6 +1,6 @@
 {
     "name": "fnstraj",
-    "version": "0.3",
+    "version": "0.4",
     "author": "Kyle Hotchkiss <kyle@kylehotchkiss.com>",
     "description": "Trajectory Predictor",
     "dependencies": {

@@ -7,6 +7,10 @@
  * Garbage Collection based on process.nextTick(), but if possible,
  * we want to catch stack overflows and and see what happened.
  *
+ * Multiple Worker processes requirements:
+ * 1) Delete-on-Grab database interactions (risky) 
+ * 2) Manually set offset (of about 5s) to avoid duplicates.
+ *
  */
 
 var fnstraj	 = require('./library/fnstraj.js');
@@ -21,19 +25,18 @@ var daemon = function() {
 
 	database.read('/queue/', function( results, error ) {
 		if ( typeof error !== "undefined" && error ) {
-			//
-			// Queue is empty or DB is down. 
-			// Let's find out and act accordingly
-			//
+			/////////////////////////////////
+			// CASE: DATABASE DOWN/FORWARD //
+			/////////////////////////////////
 			sleep();
 		} else {
 			var queue = results.rows;
 			
 			if ( typeof queue === "object" && typeof queue[0] !== "undefined" ) {
-				var thisID		= queue[0].id; // pass this as the flight ID
-				var thisRev		= queue[0].value.rev;
-				// var thisFlight  = queue[0].document. // ??
-				
+				var thisFlight  = queue[0];
+				var thisID		= thisFlight.id;
+				var thisRev		= thisFlight.value.rev;
+
 				var now = new Date();
 				var utc = now.getTime() + ( now.getTimezoneOffset() * 60000 );
 				
@@ -41,8 +44,8 @@ var daemon = function() {
 					options: {
 						debug:      false,
 						context:    "terminal",
-						flightID:   "123456789",
-						model:      "rap",
+						flightID:   thisID,
+						model:      "gfs",
 						resolution: 1
 					},
 					launch: {
@@ -86,7 +89,8 @@ var daemon = function() {
 						
 						// email user
 						
-						database.remove('/queue/' + thisID, thisRev, function() { // error handling?
+						database.remove('/queue/' + thisID, thisRev, function() { 
+							// error handling? Database error means LOST DATA here.
 							advance();
 						});	
 					}
