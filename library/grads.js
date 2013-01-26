@@ -59,12 +59,9 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determination for RAP //
     ////////////////////////////////////////////
     if ( model === "rap" ) {
-        //
-        // Absolute value check maybe.
-        //
-        rap_offset = 3 + ( now.getHours() - launch.getHours() );
-
-        rap_hourset = launch.getHours() - 2; // It seems 2 hours may be the RAP offset, or we may be limited to an 18 hour set. We can account for a limitation
+        // 3 hours seems to be our safest constant.
+        rap_offset  = ( now.getHours() - launch.getHours() ) + 3;
+        rap_hourset = launch.getHours() - 3;
         rap_hourset = ( rap_hourset < 10 ) ? "0" + rap_hourset : rap_hourset;
     }
 
@@ -74,6 +71,9 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determinaion for GFS(HD) //
     ///////////////////////////////////////////////
     if ( model === "gfs" || model === "gfshd" ) {
+        //
+        // Totally broken right now: currently uses negative hour things.
+        //
         var thisHour   = now.getHours();
         var launchHour = launch.getHours();
 
