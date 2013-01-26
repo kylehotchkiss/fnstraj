@@ -49,6 +49,8 @@ proxy.post('/', function( req, res ) {
 		if ( typeof error !== "undefined" && error ) {
 			console.log("  databasefail: " + error.message);
 
+			// wtf errors not showing up here
+
 			res.send("failure :(");
 		} else {
 			res.send("success :)");

@@ -3,12 +3,12 @@
  * fnstraj | Simple CouchDB Wrapper
  * Copyright 2011-2013 Kyle Hotchkiss
  * Released under the GPL
- * 
+ *
  * Usage can be found in /defunct/ fnstraj code in Projects/Node.js
  * Callbacks for errors need revise, only one var needed
  *
  */
- 
+
 var url = require("url");
 var http = require("http");
 
@@ -30,30 +30,30 @@ var db_pass = process.env.CLOUDANT_PASS;
 exports.read = function( path, callback ) {
     if ( path.substr(-1) === "/" ) {
         // CASE: URL is a listing OR view... what shall we do
-        
+
         path += "_all_docs?include_docs=true";
     }
-    
+
     var buffer = "";
     var couchdb = http.get({
         auth: db_user + ":" + db_pass,
         host: db_host,
         path: path,
-        port: db_port 
+        port: db_port
     }, function( response ) {
         response.setEncoding('utf8');
-        
+
         response.on("data", function( data ) {
             buffer += data;
         });
-        
+
         response.on("end", function() {
             var results = JSON.parse( buffer );
-            
+
             callback( results );
         });
     }).on("error", function() {
-        callback( false, true );
+        callback( true );
     });
 };
 
@@ -67,28 +67,28 @@ exports.write = function( path, data, callback ) {
     exports.read( path, function( results ) {
         if ( !results.error ) {
             // Data is being rewriten - how do we change the URL?
-            
+
             if ( data._rev === results._rev ) {
                 // CASE: Revisions match
-                
+
             }
         }
 
         var couchdb = http.request({
             auth: db_user + ":" + db_pass,
-            host: db_host,            
+            host: db_host,
             path: path,
             port: db_port,
-            headers: { "Content-Type": "application/json" },            
-            method: "PUT"                  
+            headers: { "Content-Type": "application/json" },
+            method: "PUT"
         }, function() {
             if ( typeof callback !== "undefined") {
                 callback();
             }
         }).on("error", function() {
-              callback( false, true );
+              callback( true );
         });
-                
+
         couchdb.write( JSON.stringify(data) );
         couchdb.end();
     });
@@ -115,7 +115,7 @@ exports.remove = function( path, rev, callback ) {
         if ( typeof callback !== "undefined" ) {
             callback( true );
         }
-    });  
-    
+    });
+
     couchdb.end();
 };
