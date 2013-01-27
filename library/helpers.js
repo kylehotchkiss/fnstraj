@@ -6,7 +6,16 @@
  *
  */
 
-var http = require("http");
+var http        = require("http");
+var https       = require("https");
+var querystring = require('querystring');
+
+
+
+var mailgun_api  = "";
+var mailgun_url  = "";
+var mailgun_from = "";
+
 
 
 ////////////////////////////////////
@@ -53,6 +62,36 @@ exports.coordsToCity = function( latitude, longitude, callback ) {
 	});
 }
 
-//
-// Email User
-//
+
+
+/////////////////////////////////
+// Email Wrapper (via Mailgun) //
+/////////////////////////////////
+exports.sendMail = function( to, subject, body, callback ) {
+    var status = "";
+    
+    var message = querystring.stringify({
+        from: mailgun_from,
+        to: to,
+        subject: subject,
+        text: body
+    });
+
+	var mailgun = https.request({
+    	auth: "api" + ":key-" + mailgun_key,
+    	host: "api.mailgun.net",
+    	path: "/v2/" + mailgun_url + "/messages",
+    	headers: {  
+        	'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Length': message.length
+        },
+    	method: "POST"
+	}, function() {
+        callback();
+	}).on('error', function() {
+        callback( true );
+    });
+	
+	mailgun.write( message );
+	mailgun.end();
+}

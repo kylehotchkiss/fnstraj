@@ -38,7 +38,7 @@ exports.read = function( path, callback ) {
     var couchdb = http.get({
         auth: db_user + ":" + db_pass,
         host: db_host,
-        path: path,
+        path: path, 
         port: db_port
     }, function( response ) {
         response.setEncoding('utf8');
@@ -63,7 +63,7 @@ exports.read = function( path, callback ) {
 // DATABASE WRITE REQUEST //
 ////////////////////////////
 exports.write = function( path, data, callback ) {
-    // Critical: Can't support ammends!
+    // Critical: Can't support amends!
     exports.read( path, function( results ) {
         if ( !results.error ) {
             // Data is being rewriten - how do we change the URL?

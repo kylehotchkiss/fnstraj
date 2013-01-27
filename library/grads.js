@@ -19,10 +19,6 @@ var async = require('async');
 var position = require('./position.js');
 
 
-//
-// automatically pick model :P
-//
-
 
 exports.wind = function( frame, time, flight, table, cache, stats, parentCallback ) {
     var gfs_hourset, gfs_offset, lev, u_ext, v_ext;

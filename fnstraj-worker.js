@@ -12,8 +12,9 @@
  * 2) Manually set offset (of about 5s) to avoid duplicates.
  *
  */
-
+ 
 var fnstraj	 = require('./library/fnstraj.js');
+var helpers  = require('./library/helpers.js');
 var database = require('./library/database.js');
 
 
@@ -82,6 +83,8 @@ var daemon = function() {
 						database.remove('/queue/' + thisID, thisRev, function() {
 							console.log("prediction was broken, deleting.")
 
+							
+
 							advance();
 						});
 					} else {
@@ -89,11 +92,20 @@ var daemon = function() {
 						// CASE: COMPLETE/FORWARD //
 						////////////////////////////
 
-						// email user
+						// async.parallel is okay here.
 
 						database.remove('/queue/' + thisID, thisRev, function() {
 							// error handling? Database error means LOST DATA here.
-							advance();
+							
+							helpers.sendMail('kyle@kylehotchkiss.com', 'fnstraj update', 'we\'re finished with your report', function( error ) {
+								
+								if (error) {
+									console.log("error :(");
+								}
+								
+								advance();	
+							})
+							
 						});
 					}
 
