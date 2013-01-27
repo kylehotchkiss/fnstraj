@@ -12,11 +12,13 @@
  * 2) Manually set offset (of about 5s) to avoid duplicates.
  *
  */
- 
+var async    = require('async');
 var fnstraj	 = require('./library/fnstraj.js');
 var helpers  = require('./library/helpers.js');
 var database = require('./library/database.js');
 
+
+var fnstraj_sleep = process.env.FNSTRAJ_SLEEP;
 
 
 ////////////////////////////////////////
@@ -45,8 +47,8 @@ var daemon = function() {
 
 				var flight = {
 					options: {
-						debug:      true,
-						context:    "terminal",
+						debug:      false,
+						context:    "daemon",
 						flightID:   thisID,
 						model:      thisFlight.options.model,
 						resolution: 1
@@ -81,10 +83,10 @@ var daemon = function() {
 						// right now, this is breaking. Delete and report broken queue.
 
 						database.remove('/queue/' + thisID, thisRev, function() {
-							console.log("prediction was broken, deleting.")
+							console.log("Prediction " + thisID + " failed - removing.")
 
+							helpers.sendMail('kyle@kylehotchkiss.com', 'fnstraj failed', 'lol');
 							
-
 							advance();
 						});
 					} else {
@@ -97,15 +99,9 @@ var daemon = function() {
 						database.remove('/queue/' + thisID, thisRev, function() {
 							// error handling? Database error means LOST DATA here.
 							
-							helpers.sendMail('kyle@kylehotchkiss.com', 'fnstraj update', 'we\'re finished with your report', function( error ) {
+							helpers.sendMail('kyle@kylehotchkiss.com', 'fnstraj update', 'we\'re finished with your report'); 
 								
-								if (error) {
-									console.log("error :(");
-								}
-								
-								advance();	
-							})
-							
+							advance();
 						});
 					}
 
@@ -157,7 +153,7 @@ var sleep = function() {
 		process.nextTick( function() {
 			daemon();
 		});
-	}, 3000); // 5min, but needs to be envvar
+	}, fnstraj_sleep); // 5min, but needs to be envvar
 };
 
 

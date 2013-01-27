@@ -55,6 +55,8 @@ exports.predict = function( flight, parentCallback ) {
         if ( flight.options.debug ) {
             console.log("\n\033[1;37m URL root: http://nomads.ncep.noaa.gov:9090/dods/\033[0m");
         }
+    } else {
+        console.log("Predicting: flight #" + flight.options.flightID);
     }
 
 
@@ -115,6 +117,8 @@ exports.predict = function( flight, parentCallback ) {
 
                     if ( flight.options.context === "terminal") {
                         console.log("\n   Predictor Complete - See exports/ for results!\n");
+                    } else {
+                        console.log("Complete: flight #" + flight.options.flightID);
                     }
 
                     process.nextTick(function() {
@@ -130,7 +134,7 @@ exports.predict = function( flight, parentCallback ) {
                         delete stats.endTime; delete stats.startTime;
                         delete flight.flying; delete flight.status;
 
-                        if ( flight.options.debug ) {
+                        if ( flight.options.context === "terminal" && flight.options.debug ) {
                             console.log("\n   Stats: " + JSON.stringify(stats) + "\n");
                         }
 

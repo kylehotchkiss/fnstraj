@@ -226,7 +226,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 u_url = url.parse(baseURL + modelURL + u_ext);
                 u_res = "";
 
-                if ( flight.options.debug ) {
+                if ( flight.options.context === "terminal" && flight.options.debug ) {
                     console.log( "   HIT: " + modelURL + u_ext );
                 }
 
@@ -263,7 +263,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 v_url = url.parse(baseURL + modelURL + v_ext);
                 v_res = "";
 
-                if ( flight.options.debug ) {
+                if ( flight.options.context === "terminal" && flight.options.debug ) {
                     console.log( "   HIT: " + modelURL + v_ext );
                 }
 
@@ -289,7 +289,11 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
         }
     }, function( error, results ) {
         if ( error ) {
-            console.log("\n\033[0;31m GrADS Fail: \n  Request Error (can you reach http://nomads.ncep.noaa.gov:9090/ ?)\033[0m\n");
+            if ( flight.options.context === "terminal" ) {
+                console.log("\n\033[0;31m GrADS Fail: \n  Request Error (can you reach http://nomads.ncep.noaa.gov:9090/ ?)\033[0m\n");
+            } else {
+                console.log("Failed: flight #" + flight.options.flightID + " (grads connectivity failure)");
+            }
 
             parentCallback( error );
         } else {
@@ -303,29 +307,33 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 // What's that? your innocent mind ponders. It's the end,
                 // I answer, wallowing in all my lost predictions.
                 //
-                console.log("\n\033[1;31m GrADS Fail:\033[0m");
-
-                var u_errorStart = results.u_wind.indexOf("because of the following error:<p>\n<b>") + 38;
-                var u_errorEnd   = results.u_wind.indexOf("</b><p>\nCheck the syntax of your request,");
-                var v_errorStart = results.u_wind.indexOf("because of the following error:<p>\n<b>") + 38;
-                var v_errorEnd   = results.u_wind.indexOf("</b><p>\nCheck the syntax of your request,");
-
-                var errorShown = false;
-
-                if ( u_errorStart !== -1 && u_errorEnd !== -1 ) {
-                    var u_error = results.u_wind.substring(u_errorStart, u_errorEnd);
-                    console.log("\033[0;31m   " + u_error + "\033[0m\n");
-                    errorShown = true;
-                }
-
-                if ( v_errorStart !== -1 && v_errorEnd !== -1 && errorShown === false ) {
-                    var v_error = results.v_wind.substring(v_errorStart, v_errorEnd);
-                    console.log("\033[0;31m   " + v_error + "\033[0m\n");
-                    errorShown = true;
-                }
-
-                if ( !errorShown ) {
-                    console.log("\033[0;31m    Unknown Error.\033[0m");
+                if ( flight.options.context === "terminal" ) {
+                    console.log("\n\033[1;31m GrADS Fail:\033[0m");
+    
+                    var u_errorStart = results.u_wind.indexOf("because of the following error:<p>\n<b>") + 38;
+                    var u_errorEnd   = results.u_wind.indexOf("</b><p>\nCheck the syntax of your request,");
+                    var v_errorStart = results.u_wind.indexOf("because of the following error:<p>\n<b>") + 38;
+                    var v_errorEnd   = results.u_wind.indexOf("</b><p>\nCheck the syntax of your request,");
+    
+                    var errorShown = false;
+    
+                    if ( u_errorStart !== -1 && u_errorEnd !== -1 ) {
+                        var u_error = results.u_wind.substring(u_errorStart, u_errorEnd);
+                        console.log("\033[0;31m   " + u_error + "\033[0m\n");
+                        errorShown = true;
+                    }
+    
+                    if ( v_errorStart !== -1 && v_errorEnd !== -1 && errorShown === false ) {
+                        var v_error = results.v_wind.substring(v_errorStart, v_errorEnd);
+                        console.log("\033[0;31m   " + v_error + "\033[0m\n");
+                        errorShown = true;
+                    }
+    
+                    if ( !errorShown ) {
+                        console.log("\033[0;31m    Unknown Error.\033[0m");
+                    }
+                } else {
+                    console.log("Failed: flight #" + flight.options.flightID + " (gradsfail)");
                 }
 
                 parentCallback( true );

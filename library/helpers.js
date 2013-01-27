@@ -12,9 +12,9 @@ var querystring = require('querystring');
 
 
 
-var mailgun_api  = "";
-var mailgun_url  = "";
-var mailgun_from = "";
+var mailgun_key  = process.env.MAILGUN_KEY;
+var mailgun_url  = process.env.MAILGUN_URL;
+var mailgun_from = process.env.MAILGUN_FROM;
 
 
 
@@ -87,9 +87,13 @@ exports.sendMail = function( to, subject, body, callback ) {
         },
     	method: "POST"
 	}, function() {
-        callback();
+        if ( typeof callback !== "undefined" ) {
+            callback();
+        }
 	}).on('error', function() {
-        callback( true );
+        if ( typeof callback !== "undefined" ) {
+            callback( true );
+        }
     });
 	
 	mailgun.write( message );
