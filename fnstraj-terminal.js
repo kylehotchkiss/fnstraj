@@ -41,11 +41,13 @@ if ( process.argv.length >= 4 ) {
         // but context will do for now.
         //
         options: {
-            debug:      false,
-            context:    "terminal",
-            flightID:   "123456789",
-            model:      model,
-            resolution: 1
+            context:        "terminal",
+            flightID:       "123456789",
+            model:          model,
+            overrideClimb:  false,
+            
+            debug:          false;
+            resolution:     1
         },
         launch: {
             latitude:   sanitize(latitude).toFloat(),

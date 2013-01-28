@@ -81,7 +81,9 @@ exports.ascend = function( currAlt, burstAlt, lift, radius ) {
     // Lift: Kilograms
     // Radius: Metres (?)
     //
-    // needs to account for balloon radius expansion
+    // *needs to account for balloon radius expansion* 
+    // Ascent rate should be near-constant (or mentally average-able) 
+    // when this is properly accounted for
     //
     return Math.sqrt(( lift / 1000 ) * GRAVITY / (.5 * .3 * physics.density(currAlt) * ((( radius * radius ) * Math.PI ) / 10000 )));
 };

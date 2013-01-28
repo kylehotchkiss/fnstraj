@@ -23,27 +23,31 @@ proxy.use(express.bodyParser());
 //////////////////////////////
 proxy.post('/', function( req, res ) {
 
-	content = {
+	var content = {
 		parameters: {
-			options: {
+			meta: {
+				name: "",
+				email: "",
+				program: ""
+			},options: {
 				model: req.body.model,
+			}, launch: {
+				altitude:  req.body.altitude,
+				latitude:  req.body.latitude,
+				longitude: req.body.longitude
+			}, balloon: {
+				lift: req.body.lift,
+				burst: req.body.burst,
+				burstRadius: req.body.burstRadius,
+				launchRadius: req.body.launchRadius
 			},
-			launch: {
-				latitude:   req.body.latitude,
-				longitude:  req.body.longitude,
-				altitude:   0
-			},
-			balloon: {
-				radius:     req.body.bRadius,
-				lift:       req.body.lift,
-				burst:      req.body.burst
-			},
-			parachute: {
-				radius:     req.body.pRadius,
-				weight:     0
+			payload: {
+				weight: req.body.weight,
+				chuteRadius: req.body.chuteRadius,
 			}
 		}
-	}
+	};
+	
 
 	database.write('/queue/' + Math.round((Math.random() * 10000)), content, function( error ) {
 		if ( typeof error !== "undefined" && error ) {
@@ -55,8 +59,13 @@ proxy.post('/', function( req, res ) {
 		} else {
 			res.send("success :)");
 		}
+	});
 
-	})
+	////////////////////////
+	// CORS Configuration //
+	////////////////////////
+	res.setHeader('Access-Control-Allow-Origin', '*'); // Eventually this will need to only work for fnstraj.org
+	res.setHeader('Access-Control-Allow-Methods', 'POST');
 });
 
 

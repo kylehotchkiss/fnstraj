@@ -27,13 +27,12 @@ exports.predict = function( flight, parentCallback ) {
     ////////////////////
     // Initialization //
     ////////////////////
-    var cache = [],
-        stats = { frames: 0, gradsHits: 0, cacheHits: 0, startTime: new Date().getTime() },
-        table = [{ latitude: flight.launch.latitude, longitude: flight.launch.longitude, altitude: flight.launch.altitude }];
+    var cache = [];
+    var stats = { frames: 0, gradsHits: 0, cacheHits: 0, startTime: new Date().getTime() },
+    var table = [{ latitude: flight.launch.latitude, longitude: flight.launch.longitude, altitude: flight.launch.altitude }];
 
     flight.flying = true;
-    flight.status = "ascending";
-
+    
 
 
     ////////////////////////
@@ -41,6 +40,12 @@ exports.predict = function( flight, parentCallback ) {
     ////////////////////////
     if ( typeof flight.options.model === "undefined" || (( flight.options.model !== "rap" && flight.options.model !== "gfs" && flight.options.model != "gfshd" ))) {
         flight.options.model = "gfs";
+    }
+    
+    if ( typeof flight.options.overrideClimb === "boolean" && flight.options.overrideClimb ) {
+        flight.status = "descending";
+    } else {
+        flight.status = "ascending";
     }
 
 
@@ -73,10 +78,10 @@ exports.predict = function( flight, parentCallback ) {
         // PRIMARY LOOP //
         //////////////////
         function ( callback ) {
-            var timestep = flight.launch.timestamp + ((table.length - 1 ) * 1000); //ms or s bro
+            var timestep = flight.launch.timestamp + ((table.length - 1 ) * 1000); // Add +1 minute for every frame. In the future, this may be dynamic.
 
             if ( flight.status === "ascending" ) {
-                var ascended = 5;//position.ascend( table[table.length - 1].altitude, flight.balloon.burst, flight.balloon.lift, flight.balloon.radius );
+                var ascended = 5; //position.ascend( table[table.length - 1].altitude, flight.balloon.burst, flight.balloon.lift, flight.balloon.radius );
                 var currAlt = ( ascended * 60 ) + table[table.length - 1].altitude; // CONSTANT TO VARIABLE: Percision
 
                 if ( currAlt < flight.balloon.burst ) {
@@ -84,7 +89,7 @@ exports.predict = function( flight, parentCallback ) {
 
                     stats.frames++;
 
-                    grads.wind( table[table.length - 2 ], timestep, flight, table, cache, stats, callback ); // Variable me!
+                    grads.wind( table[table.length - 2 ], timestep, flight, table, cache, stats, callback );
                 } else {
                     /////////////////////////////////////////////
                     // BURST                                   //

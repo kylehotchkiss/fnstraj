@@ -12,9 +12,9 @@
  * 2) Manually set offset (of about 5s) to avoid duplicates.
  *
  */
-var async    = require('async');
+var async	 = require('async');
 var fnstraj	 = require('./library/fnstraj.js');
-var helpers  = require('./library/helpers.js');
+var helpers	 = require('./library/helpers.js');
 var database = require('./library/database.js');
 
 
@@ -36,40 +36,61 @@ var daemon = function() {
 			var queue = results.rows;
 
 			if ( typeof queue === "object" && typeof queue[0] !== "undefined" ) {
+				//////////////////
+				// DATA SORTING //
+				//////////////////
 				var thisID		= queue[0].id;
 				var thisRev		= queue[0].value.rev;
-				var thisFlight  = queue[0].doc.parameters;
+				var thisFlight	= queue[0].doc.parameters;
 
-
+				////////////////
+				// TIME SETUP //
+				////////////////
 				var now = new Date();
 				var utc = now.getTime() + ( now.getTimezoneOffset() * 60000 );
+				
+				/////////////////////
+				// OPTIONS PARSING //
+				/////////////////////
+				if ( typeof thisFlight.options.overrideClimb === "boolean" && thisFlight.options.overrideClimb ) {
+					overrideClimb = true;
+				} else {
+					overrideClimb = false;
+				}
+				
 
-
+				/////////////////////////////////
+				// FLIGHT OBJECT ESTABLISHMENT //
+				/////////////////////////////////
 				var flight = {
 					options: {
-						debug:      false,
-						context:    "daemon",
-						flightID:   thisID,
-						model:      thisFlight.options.model,
-						resolution: 1
-					},
-					launch: {
-						latitude:   37.403672,
-						longitude:  -79.170205,
-						altitude:   0,
-						timestamp:  utc
-					},
-					balloon: {
-						radius:     0,
-						lift:       0,
-						burst:      30000
-					},
-					parachute: {
-						radius:     0,
-						weight:     0
+						model: thisFlight.options.model,
+						context: "daemon",
+						flightID: thisID,
+						
+						// Optional
+						debug: false,
+						resolution: 1,
+						overrideClimb: overrideClimb
+					}, launch: {
+						altitude: thisFlight.launch.altitude,						
+						latitude: thisFlight.launch.latitude,
+						longitude: thisFlight.launch.longitude,
+						timestamp: utc
+					}, balloon: {
+						lift: thisFlight.balloon.lift,
+						burst: thisFlight.balloon.burst,
+						burstRadius: thisFlight.balloon.burstRadius,						
+						launchRadius: thisFlight.balloon.launchRadius
+					}, payload: {
+						weight:	thisFlight.payload.weight,
+						chuteRadius: thisFlight.payload.chuteRadius,						
 					}
-				}
+				};
 
+				/////////////////////////////////////////
+				// RUN PREDICTOR BASED ON ABOVE OBJECT //
+				/////////////////////////////////////////
 				fnstraj.predict( flight, function( error ) {
 
 					if ( typeof error !== "undefined" && error ) {
@@ -77,13 +98,14 @@ var daemon = function() {
 						// CASE: PREDICTION FAILED/FORWARD //
 						/////////////////////////////////////
 
-						// log error
-						// email user
+						/* Until gfs/hd hoursets are stable, we can't requeue with success */
 
-						// right now, this is breaking. Delete and report broken queue.
-
-						database.remove('/queue/' + thisID, thisRev, function() {
-							console.log("Prediction " + thisID + " failed - removing.")
+						database.remove('/queue/' + thisID, thisRev, function( error ) {
+							// We're a bit error agnostic at this point, for some reason.
+							
+							console.log("Prediction " + thisID + " failed - removing.");
+							
+							// can we log to database? output.logError would be neat.
 
 							helpers.sendMail('kyle@kylehotchkiss.com', 'fnstraj failed', 'lol');
 							
@@ -93,15 +115,18 @@ var daemon = function() {
 						////////////////////////////
 						// CASE: COMPLETE/FORWARD //
 						////////////////////////////
-
-						// async.parallel is okay here.
-
-						database.remove('/queue/' + thisID, thisRev, function() {
-							// error handling? Database error means LOST DATA here.
-							
-							helpers.sendMail('kyle@kylehotchkiss.com', 'fnstraj update', 'we\'re finished with your report'); 
+						database.remove('/queue/' + thisID, thisRev, function( error ) {
+							if ( typeof error !== "undefined" && error ) {
+								console.log("CRITICAL: Cannot connect to database");
 								
-							advance();
+								// Can we do anything about this? We could forever-loop for DB?
+								
+								advance();
+							} else {
+								helpers.sendMail('kyle@kylehotchkiss.com', 'fnstraj update', 'we\'re finished with your report'); 
+							
+								advance();
+							}
 						});
 					}
 
@@ -115,21 +140,6 @@ var daemon = function() {
 			}
 		}
 	});
-
-
-	/*
-
-		# Process:
-
-		1) check DB for queries (to multithread, we need to remove entries on grab)
-		2) get all relevant flight data (preverified)
-		3) build flight object, fnstraj.predict();
-		4) on success, delete entry; on failure, log error and ???
-		5) mail (or add to mail queue) the job status
-		6) nextTick into next iteration
-
-	*/
-
 }
 
 
@@ -153,7 +163,7 @@ var sleep = function() {
 		process.nextTick( function() {
 			daemon();
 		});
-	}, fnstraj_sleep); // 5min, but needs to be envvar
+	}, fnstraj_sleep); 
 };
 
 
