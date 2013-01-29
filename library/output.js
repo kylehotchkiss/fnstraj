@@ -16,31 +16,32 @@ var database = require('./database.js')
 // MODULAR FILE EXPORTS (in parallel) //
 ////////////////////////////////////////
 exports.export = function( flight, table, stats, parentCallback ) {
-	async.parallel([
-		//
-		// Just throw in any other output functions
-		// below and then add them to this array.
-		//
-		// SaaS: run outputs based on context, or via options in primary file
-		//
-		function( callback ) {
-			exports.writeCSV( flight, table, callback );
-		},
-
-		function( callback ) {
-			exports.writeKML( flight, table, callback );
-		},
-
-		function( callback ) {
-			exports.writeJSON( flight, table, callback );
-		},
-		function( callback ) {
-			exports.writeDatabase( flight, table, callback );
-		}
-	], function( error, results ) {
-		// Do we care about errors in each output?
-		parentCallback();
-	});
+	
+	if ( flight.options.context === "terminal" ) {
+		async.parallel([
+			//
+			// Just throw in any other output functions
+			// below and then add them to this array.
+			//
+			function( callback ) {
+				exports.writeCSV( flight, table, callback );
+			}, function( callback ) {
+				exports.writeKML( flight, table, callback );
+			}, function( callback ) {
+				exports.writeJSON( flight, table, callback );
+			}
+		], function( error, results ) {
+			parentCallback();
+		});	
+	} else {
+		async.parallel([
+			function( callback ) {
+				exports.writeDatabase( flight, table, callback );
+			}
+		], function( error, results ) {
+			parentCallback();
+		});		
+	}
 
 }
 
@@ -153,7 +154,7 @@ exports.writeJSON = function( flight, table, callback ) {
 
 
 ///////////////////////////////
-// DATABASE (Couchdb) EXPORT //
+// DATABASE (CouchDB) EXPORT //
 ///////////////////////////////
 exports.writeDatabase = function ( flight, table, callback ) {
 	//

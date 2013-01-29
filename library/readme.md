@@ -30,3 +30,6 @@ This one is the one that probably needs some peer review. It just contains all t
 
 ### position.js 
 Ugh. Anything dealing with converting coordinates to more practical units of distance. Hope you know when to use a great-circle distance and when to use spherical law of cosines. This may be the biggest bottleneck to accuracy, I need to research that, however.
+
+### spot.js
+Wrapper around the SPOT GPS Tracking feature. 

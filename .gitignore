@@ -2,7 +2,7 @@
 .DS_Store
 
 # Node Cuft
-node_modules
+node_modules/
 
 # Application Cuft
 exports/*.kml

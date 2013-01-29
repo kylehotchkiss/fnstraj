@@ -45,8 +45,8 @@ if ( process.argv.length >= 4 ) {
             flightID:       "123456789",
             model:          model,
             overrideClimb:  false,
-            
-            debug:          false;
+
+            debug:          false,
             resolution:     1
         },
         launch: {

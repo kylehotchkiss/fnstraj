@@ -20,6 +20,12 @@ var database = require('./library/database.js');
 
 var fnstraj_sleep = process.env.FNSTRAJ_SLEEP;
 
+/*
+	flag compatibility will not be easy by any means. We have to get the entire queue, and interate each
+	item by it's queue order. Each item must be marked as processing, and deleted if done. We also
+	must check SPOT if the item is queued as such. SPOT checking must quit when two SPOT locations
+	show up as the same altitude.
+*/
 
 ////////////////////////////////////////
 // WORKER LOOP (Optimized for Heroku) //
@@ -43,12 +49,14 @@ var daemon = function() {
 				var thisRev		= queue[0].value.rev;
 				var thisFlight	= queue[0].doc.parameters;
 
+
 				////////////////
 				// TIME SETUP //
 				////////////////
 				var now = new Date();
 				var utc = now.getTime() + ( now.getTimezoneOffset() * 60000 );
-				
+
+
 				/////////////////////
 				// OPTIONS PARSING //
 				/////////////////////
@@ -57,7 +65,7 @@ var daemon = function() {
 				} else {
 					overrideClimb = false;
 				}
-				
+
 
 				/////////////////////////////////
 				// FLIGHT OBJECT ESTABLISHMENT //
@@ -67,26 +75,27 @@ var daemon = function() {
 						model: thisFlight.options.model,
 						context: "daemon",
 						flightID: thisID,
-						
+
 						// Optional
 						debug: false,
 						resolution: 1,
 						overrideClimb: overrideClimb
 					}, launch: {
-						altitude: thisFlight.launch.altitude,						
-						latitude: thisFlight.launch.latitude,
-						longitude: thisFlight.launch.longitude,
+						altitude: parseFloat(thisFlight.launch.altitude),
+						latitude: parseFloat(thisFlight.launch.latitude),
+						longitude: parseFloat(thisFlight.launch.longitude),
 						timestamp: utc
 					}, balloon: {
-						lift: thisFlight.balloon.lift,
-						burst: thisFlight.balloon.burst,
-						burstRadius: thisFlight.balloon.burstRadius,						
-						launchRadius: thisFlight.balloon.launchRadius
+						lift: parseFloat(thisFlight.balloon.lift),
+						burst: parseFloat(thisFlight.balloon.burst),
+						burstRadius: parseFloat(thisFlight.balloon.burstRadius),
+						launchRadius: parseFloat(thisFlight.balloon.launchRadius)
 					}, payload: {
-						weight:	thisFlight.payload.weight,
-						chuteRadius: thisFlight.payload.chuteRadius,						
+						weight:	parseFloat(thisFlight.payload.weight),
+						chuteRadius: parseFloat(thisFlight.payload.chuteRadius),
 					}
 				};
+
 
 				/////////////////////////////////////////
 				// RUN PREDICTOR BASED ON ABOVE OBJECT //
@@ -102,13 +111,12 @@ var daemon = function() {
 
 						database.remove('/queue/' + thisID, thisRev, function( error ) {
 							// We're a bit error agnostic at this point, for some reason.
-							
-							console.log("Prediction " + thisID + " failed - removing.");
-							
 							// can we log to database? output.logError would be neat.
 
-							helpers.sendMail('kyle@kylehotchkiss.com', 'fnstraj failed', 'lol');
-							
+							emailContent = "Hey There,\n\nWe are sad to inform you that your trajectory request did not successfully compile. fnstraj is very new software, and we still have some kinks to work out. We are unable to re-queue your flight at this time, but feel free to try again, with a different model.\n\nThanks for experimenting with us,\n- fnstraj";
+
+							helpers.sendMail("kyle@kylehotchkiss.com", "fnstraj failed: flight #" + thisID, emailContent);
+
 							advance();
 						});
 					} else {
@@ -118,13 +126,15 @@ var daemon = function() {
 						database.remove('/queue/' + thisID, thisRev, function( error ) {
 							if ( typeof error !== "undefined" && error ) {
 								console.log("CRITICAL: Cannot connect to database");
-								
+
 								// Can we do anything about this? We could forever-loop for DB?
-								
+
 								advance();
 							} else {
-								helpers.sendMail('kyle@kylehotchkiss.com', 'fnstraj update', 'we\'re finished with your report'); 
-							
+								emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org.hm.dev/view.php?id=" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj"
+
+								helpers.sendMail('kyle@kylehotchkiss.com', "fnstraj prediction: flight #" + thisID, emailContent);
+
 								advance();
 							}
 						});
@@ -163,7 +173,7 @@ var sleep = function() {
 		process.nextTick( function() {
 			daemon();
 		});
-	}, fnstraj_sleep); 
+	}, fnstraj_sleep);
 };
 
 

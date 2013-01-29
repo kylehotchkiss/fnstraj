@@ -36,7 +36,10 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Lazy null-dreamcatcher //
     ////////////////////////////
     for ( var i = 0; i < arguments.length; i++ ) {
-        if ( arguments[i] === null || arguments === NaN ) {
+        //
+        // This may need to be depricated. We're pretty good about not missing variables.
+        //
+        if ( arguments[i] === null || arguments[i] === NaN ) {
             console.log("\033[1;31m  logicfail:\n   NULL caught/grads.js.\033[0m\n");
 
             parentCallback( true );
@@ -55,7 +58,8 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determination for RAP //
     ////////////////////////////////////////////
     if ( model === "rap" ) {
-        // 3 hours seems to be our safest constant.
+        // 3 hours seems to be our safest constant - but not always.
+        // Do we need time-travelling in here?
         rap_offset  = ( now.getHours() - launch.getHours() ) + 3;
         rap_hourset = launch.getHours() - 3;
         rap_hourset = ( rap_hourset < 10 ) ? "0" + rap_hourset : rap_hourset;
@@ -69,6 +73,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     if ( model === "gfs" || model === "gfshd" ) {
         //
         // Totally broken right now: currently uses negative hour things.
+        // hourset selection is adequate, but offset is borked.
         //
         var thisHour   = now.getHours();
         var launchHour = launch.getHours();
@@ -91,7 +96,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
             gfs_hourset = 18;
         }
 
-        gfs_offset = thisHour - gfs_hourset; // will break between 5am and 10am est currently (s/n breaking at 7pm)
+        gfs_offset = thisHour - 5;//- gfs_hourset; // will break between 5am and 10am est currently (s/n breaking at 7pm)
         gfs_hourset = ( gfs_hourset < 10 ) ? "0" + gfs_hourset : gfs_hourset;
     }
 
@@ -309,26 +314,26 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 //
                 if ( flight.options.context === "terminal" ) {
                     console.log("\n\033[1;31m GrADS Fail:\033[0m");
-    
+
                     var u_errorStart = results.u_wind.indexOf("because of the following error:<p>\n<b>") + 38;
                     var u_errorEnd   = results.u_wind.indexOf("</b><p>\nCheck the syntax of your request,");
                     var v_errorStart = results.u_wind.indexOf("because of the following error:<p>\n<b>") + 38;
                     var v_errorEnd   = results.u_wind.indexOf("</b><p>\nCheck the syntax of your request,");
-    
+
                     var errorShown = false;
-    
+
                     if ( u_errorStart !== -1 && u_errorEnd !== -1 ) {
                         var u_error = results.u_wind.substring(u_errorStart, u_errorEnd);
                         console.log("\033[0;31m   " + u_error + "\033[0m\n");
                         errorShown = true;
                     }
-    
+
                     if ( v_errorStart !== -1 && v_errorEnd !== -1 && errorShown === false ) {
                         var v_error = results.v_wind.substring(v_errorStart, v_errorEnd);
                         console.log("\033[0;31m   " + v_error + "\033[0m\n");
                         errorShown = true;
                     }
-    
+
                     if ( !errorShown ) {
                         console.log("\033[0;31m    Unknown Error.\033[0m");
                     }

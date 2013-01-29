@@ -28,11 +28,11 @@ exports.predict = function( flight, parentCallback ) {
     // Initialization //
     ////////////////////
     var cache = [];
-    var stats = { frames: 0, gradsHits: 0, cacheHits: 0, startTime: new Date().getTime() },
+    var stats = { frames: 0, gradsHits: 0, cacheHits: 0, startTime: new Date().getTime() };
     var table = [{ latitude: flight.launch.latitude, longitude: flight.launch.longitude, altitude: flight.launch.altitude }];
 
     flight.flying = true;
-    
+
 
 
     ////////////////////////
@@ -41,7 +41,7 @@ exports.predict = function( flight, parentCallback ) {
     if ( typeof flight.options.model === "undefined" || (( flight.options.model !== "rap" && flight.options.model !== "gfs" && flight.options.model != "gfshd" ))) {
         flight.options.model = "gfs";
     }
-    
+
     if ( typeof flight.options.overrideClimb === "boolean" && flight.options.overrideClimb ) {
         flight.status = "descending";
     } else {
@@ -136,6 +136,7 @@ exports.predict = function( flight, parentCallback ) {
                         /////////////
                         // Cleanup //
                         /////////////
+                        // http://perfectionkills.com/understanding-delete/
                         delete stats.endTime; delete stats.startTime;
                         delete flight.flying; delete flight.status;
 
