@@ -16,7 +16,7 @@
 if ( process.env.NODEFLY_KEY ) {
 	require('nodefly').profile(
 		process.env.NODEFLY_KEY,
-		[ APPLICATION_NAME, 'Heroku' ]
+		['Heroku']
 	);
 }
 
