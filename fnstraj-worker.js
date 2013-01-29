@@ -12,6 +12,14 @@
  * 2) Manually set offset (of about 5s) to avoid duplicates.
  *
  */
+
+if ( process.env.NODEFLY_KEY ) {
+	require('nodefly').profile(
+		process.env.NODEFLY_KEY,
+		[ APPLICATION_NAME, 'Heroku' ]
+	);
+}
+
 var async	 = require('async');
 var fnstraj	 = require('./library/fnstraj.js');
 var helpers	 = require('./library/helpers.js');
