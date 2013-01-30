@@ -139,7 +139,7 @@ var daemon = function() {
 
 								advance();
 							} else {
-								emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org.hm.dev/view.php?id=" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj"
+								emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view.php?id=" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj"
 
 								helpers.sendMail('kyle@kylehotchkiss.com', "fnstraj prediction: flight #" + thisID, emailContent);
 
