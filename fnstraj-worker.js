@@ -121,9 +121,12 @@ var daemon = function() {
 							// We're a bit error agnostic at this point, for some reason.
 							// can we log to database? output.logError would be neat.
 
-							emailContent = "Hey There,\n\nWe are sad to inform you that your trajectory request did not successfully compile. fnstraj is very new software, and we still have some kinks to work out. We are unable to re-queue your flight at this time, but feel free to try again, with a different model.\n\nThanks for experimenting with us,\n- fnstraj";
+							if ( thisFlight.meta.email !== "" ) {
+								// Too bad if you don't have an email until 0.3.5
+								emailContent = "Hey There,\n\nWe are sad to inform you that your trajectory request did not successfully compile. fnstraj is very new software, and we still have some kinks to work out. We are unable to re-queue your flight at this time, but feel free to try again, with a different model.\n\nThanks for experimenting with us,\n- fnstraj";
 
-							helpers.sendMail("kyle@kylehotchkiss.com", "fnstraj failed: flight #" + thisID, emailContent);
+								helpers.sendMail( thisFlight.meta.email, "fnstraj failed: flight #" + thisID, emailContent );
+							}
 
 							advance();
 						});
@@ -139,9 +142,11 @@ var daemon = function() {
 
 								advance();
 							} else {
-								emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view.php?id=" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj"
+								if ( thisFlight.meta.email !== "" ) {
+									emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view.php?id=" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj"
 
-								helpers.sendMail('kyle@kylehotchkiss.com', "fnstraj prediction: flight #" + thisID, emailContent);
+									helpers.sendMail( thisFlight.meta.email, "fnstraj prediction: flight #" + thisID, emailContent );
+								}
 
 								advance();
 							}
