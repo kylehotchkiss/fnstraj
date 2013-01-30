@@ -68,7 +68,7 @@ var daemon = function() {
 				/////////////////////
 				// OPTIONS PARSING //
 				/////////////////////
-				if ( typeof thisFlight.options.overrideClimb === "boolean" && thisFlight.options.overrideClimb ) {
+				if ( typeof thisFlight.options.overrideClimb !== "undefined" && thisFlight.options.overrideClimb ) {
 					overrideClimb = true;
 				} else {
 					overrideClimb = false;
@@ -85,7 +85,7 @@ var daemon = function() {
 						flightID: thisID,
 
 						// Optional
-						debug: false,
+						debug: true,
 						resolution: 1,
 						overrideClimb: overrideClimb
 					}, launch: {

@@ -312,7 +312,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 // What's that? your innocent mind ponders. It's the end,
                 // I answer, wallowing in all my lost predictions.
                 //
-                if ( flight.options.context === "terminal" ) {
+                if ( flight.options.debug ) {
                     console.log("\n\033[1;31m GrADS Fail:\033[0m");
 
                     var u_errorStart = results.u_wind.indexOf("because of the following error:<p>\n<b>") + 38;
