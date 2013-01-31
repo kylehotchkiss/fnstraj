@@ -66,6 +66,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
 
         if ( rap_hourset < 0 ) {
             now.setHours( now.setHours( rap_hourset ) );
+            rap_hourset = now.getHours();
         }
 
     }
