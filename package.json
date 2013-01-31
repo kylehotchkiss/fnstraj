@@ -5,7 +5,6 @@
     "description": "Trajectory Predictor",
     "dependencies": {
         "async":     "0.1.x",
-        "nodefly":   "stable",
         "hashids":   "0.1.x",
         "express":   "3.x.x",
         "validator": "0.4.x"

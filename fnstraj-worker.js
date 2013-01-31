@@ -13,12 +13,12 @@
  *
  */
 
-if ( process.env.NODEFLY_KEY ) {
+/*if ( process.env.NODEFLY_KEY ) {
 	require('nodefly').profile(
 		process.env.NODEFLY_KEY,
 		['Heroku']
 	);
-}
+}*/
 
 var async	 = require('async');
 var fnstraj	 = require('./library/fnstraj.js');
