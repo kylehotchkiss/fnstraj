@@ -22,7 +22,7 @@ var position = require('./position.js');
 
 exports.wind = function( frame, time, flight, table, cache, stats, parentCallback ) {
     var gfs_hourset, gfs_offset, lev, u_ext, v_ext;
-    var now     = new Date( time );
+    var now     = new Date( time + (table.length * 60000) );
     var launch  = new Date( flight.launch.timestamp );
     var radians = Math.PI / 180;
     var degrees = 180 / Math.PI;
@@ -58,7 +58,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determination for RAP //
     ////////////////////////////////////////////
     if ( model === "rap" ) {
-        launch.setTime( launch.getTime() - 10800000 );
+        launch.setTime( launch.getTime() - 18000000 );
 
         rap_offset  = now.getHours() - launch.getHours();
 
