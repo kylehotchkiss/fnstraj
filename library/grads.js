@@ -58,17 +58,17 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determination for RAP //
     ////////////////////////////////////////////
     if ( model === "rap" ) {
-        // 3 hours seems to be our safest constant - but not always.
-        // Do we need time-travelling in here?
-        rap_offset  = ( now.getHours() - launch.getHours() ) + 3;
-        rap_hourset = launch.getHours() - 3;
+        // First, let's see if we need seperate hourset data
+        rap_offset  = now.getHours() - launch.getHours();
+
+        // Then we'll subtract three hours from NOW to verify we can always catch data:
+        now = now.getTime() - 10800000;
+
+        // Then let's get the hourset number we want to use with RAP.
+        rap_hourset = now.getHours();
+
+        // Finally, let's add a zero before any single digits.
         rap_hourset = ( rap_hourset < 10 ) ? "0" + rap_hourset : rap_hourset;
-
-        if ( rap_hourset < 0 ) {
-            now.setHours( now.setHours( rap_hourset ) );
-            rap_hourset = now.getHours();
-        }
-
     }
 
 

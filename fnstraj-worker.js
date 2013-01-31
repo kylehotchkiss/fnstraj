@@ -62,7 +62,7 @@ var daemon = function() {
 				// TIME SETUP //
 				////////////////
 				var now = new Date();
-				var utc = now.getTime() + ( now.getTimezoneOffset() * 60000 );
+				var timestamp = now.getTime();
 
 
 				/////////////////////
@@ -92,7 +92,7 @@ var daemon = function() {
 						altitude: parseFloat(thisFlight.launch.altitude),
 						latitude: parseFloat(thisFlight.launch.latitude),
 						longitude: parseFloat(thisFlight.launch.longitude),
-						timestamp: utc
+						timestamp: timestamp
 					}, balloon: {
 						lift: parseFloat(thisFlight.balloon.lift),
 						burst: parseFloat(thisFlight.balloon.burst),
