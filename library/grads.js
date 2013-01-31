@@ -73,6 +73,13 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determinaion for GFS(HD) //
     ///////////////////////////////////////////////
     if ( model === "gfs" || model === "gfshd" ) {
+        //
+        // What's happening below is called Time Travelling.
+        // We have to tell the predictor the wrong time because
+        // NOAA doesn't release hoursets on the hour, or anywhere
+        // near it for that matter. So yeah. 5 hours back.
+        //
+        launch.setTime( launch.getTime() - 18000000 );
         now.setTime( now.getTime() - 18000000 );
 
         if ( launch.getHours() <= 5 ) {
