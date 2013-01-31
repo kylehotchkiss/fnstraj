@@ -58,11 +58,15 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determination for RAP //
     ////////////////////////////////////////////
     if ( model === "rap" ) {
+        launch.setTime( launch.getTime() - 10800000 );
+
         rap_offset  = now.getHours() - launch.getHours();
 
-        now.setTime( now.getTime() - 10800000 );
+        rap_hourset = launch.getHours();
 
-        rap_hourset = now.getHours();
+        if ( launch.getDate() !== now.getDate() ) {
+            // Add the hours from the new date.
+        }
 
         rap_hourset = ( rap_hourset < 10 ) ? "0" + rap_hourset : rap_hourset;
     }
@@ -80,7 +84,6 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
         // near it for that matter. So yeah. 5 hours back.
         //
         launch.setTime( launch.getTime() - 18000000 );
-        now.setTime( now.getTime() - 18000000 );
 
         if ( launch.getHours() <= 5 ) {
             gfs_hourset = 0;
@@ -93,6 +96,11 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
         }
 
         gfs_offset  = now.getHours() - gfs_hourset;
+
+        if ( launch.getDate() !== now.getDate() ) {
+            // Add the hours from the new date.
+        }
+
         gfs_hourset = ( gfs_hourset < 10 ) ? "0" + gfs_hourset : gfs_hourset;
     }
 
