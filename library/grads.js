@@ -237,8 +237,8 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 u_url = url.parse(baseURL + modelURL + u_ext);
                 u_res = "";
 
-                if ( flight.options.context === "terminal" && flight.options.debug ) {
-                    console.log( "   HIT: " + modelURL + u_ext );
+                if (  flight.options.debug ) {
+                    console.log( "HIT: " + modelURL + u_ext );
                 }
 
                 u_req = http.get({
@@ -274,8 +274,8 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 v_url = url.parse(baseURL + modelURL + v_ext);
                 v_res = "";
 
-                if ( flight.options.context === "terminal" && flight.options.debug ) {
-                    console.log( "   HIT: " + modelURL + v_ext );
+                if ( flight.options.debug ) {
+                    console.log( "HIT: " + modelURL + v_ext );
                 }
 
                 v_req = http.get({
