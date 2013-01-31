@@ -58,16 +58,12 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determination for RAP //
     ////////////////////////////////////////////
     if ( model === "rap" ) {
-        // First, let's see if we need seperate hourset data
         rap_offset  = now.getHours() - launch.getHours();
 
-        // Then we'll subtract three hours from NOW to verify we can always catch data:
         now.setTime( now.getTime() - 10800000 );
 
-        // Then let's get the hourset number we want to use with RAP.
         rap_hourset = now.getHours();
 
-        // Finally, let's add a zero before any single digits.
         rap_hourset = ( rap_hourset < 10 ) ? "0" + rap_hourset : rap_hourset;
     }
 
@@ -77,32 +73,19 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determinaion for GFS(HD) //
     ///////////////////////////////////////////////
     if ( model === "gfs" || model === "gfshd" ) {
-        //
-        // Totally broken right now: currently uses negative hour things.
-        // hourset selection is adequate, but offset is borked.
-        //
-        var thisHour   = now.getHours();
-        var launchHour = launch.getHours();
+        now.setTime( now.getHours() - 18000000 );
 
-
-        if ( launchHour <= 5 ) {
-            //
-            // Time travel, this puts us 1 day in the past
-            //
-            now.setDate( now.getDate() - 1 ); // might break on the first day of the month
-
-            gfs_hourset = 18;
-        } else if ( launchHour > 5 && launchHour <= 11 ) {
+        if ( launch.getHours() <= 5 ) {
             gfs_hourset = 0;
-        } else if ( launchHour > 11 && launchHour <= 17 ) {
+        } else if ( launchHour > 5 && launchHour <= 11 ) {
             gfs_hourset = 6;
-        } else if ( launchHour > 17 && launchHour <= 23 ) {
+        } else if ( launchHour > 11 && launchHour <= 17 ) {
             gfs_hourset = 12;
-        } else {
+        } else if ( launchHour > 17 && launchHour <= 23 ) {
             gfs_hourset = 18;
         }
 
-        gfs_offset = thisHour - 5;//- gfs_hourset; // will break between 5am and 10am est currently (s/n breaking at 7pm)
+        gfs_offset  = now.getHours() - gfs_hourset;
         gfs_hourset = ( gfs_hourset < 10 ) ? "0" + gfs_hourset : gfs_hourset;
     }
 
