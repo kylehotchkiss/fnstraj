@@ -73,7 +73,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     // Hourset & Offset Determinaion for GFS(HD) //
     ///////////////////////////////////////////////
     if ( model === "gfs" || model === "gfshd" ) {
-        now.setTime( now.getHours() - 18000000 );
+        now.setTime( now.getTime() - 18000000 );
 
         if ( launch.getHours() <= 5 ) {
             gfs_hourset = 0;
