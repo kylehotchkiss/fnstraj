@@ -62,7 +62,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
         rap_offset  = now.getHours() - launch.getHours();
 
         // Then we'll subtract three hours from NOW to verify we can always catch data:
-        now = now.setTime( -10800000 );
+        now.setTime( -10800000 );
 
         // Then let's get the hourset number we want to use with RAP.
         rap_hourset = now.getHours();
