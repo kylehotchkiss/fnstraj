@@ -64,9 +64,11 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
 
         rap_hourset = launch.getHours();
 
-        if ( launch.getDate() !== now.getDate() ) {
-            // Add the hours from the new date.
-        }
+       if ( launch.getDate() !== now.getDate() ) {
+           gfs_offset = now.getHours() + ( 23 - gfs_hourset );
+       } else {
+           gfs_offset  = now.getHours() - gfs_hourset;
+       }
 
         rap_hourset = ( rap_hourset < 10 ) ? "0" + rap_hourset : rap_hourset;
     }
@@ -95,10 +97,10 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
             gfs_hourset = 18;
         }
 
-        gfs_offset  = now.getHours() - gfs_hourset;
-
         if ( launch.getDate() !== now.getDate() ) {
-            // Add the hours from the new date.
+            gfs_offset = now.getHours() + ( 23 - gfs_hourset );
+        } else {
+            gfs_offset  = now.getHours() - gfs_hourset;
         }
 
         gfs_hourset = ( gfs_hourset < 10 ) ? "0" + gfs_hourset : gfs_hourset;
@@ -109,10 +111,10 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
     ///////////////////////////
     // Date/Time Corrections //
     ///////////////////////////
-    var year  = now.getFullYear();
-    var month = ( now.getMonth() < 9 ) ? "0" + ( now.getMonth() + 1 ) : ( now.getMonth() + 1); // wtf why is this one month in the future
-    var date  = ( now.getDate() < 10 ) ? "0" + now.getDate() : now.getDate(); // Check this on the 10th of the month (appears fine)
-    var hour  = ( now.getHours() < 10 ) ? "0" + now.getHours() : now.getHours(); // Check this on the 10th hour (utc?)
+    var year  = launch.getFullYear();
+    var month = ( launch.getMonth() < 9 ) ? "0" + ( launch.getMonth() + 1 ) : ( launch.getMonth() + 1);
+    var date  = ( launch.getDate() < 10 ) ? "0" + launch.getDate() : launch.getDate();
+    var hour  = ( launch.getHours() < 10 ) ? "0" + launch.getHours() : launch.getHours();
 
 
 
