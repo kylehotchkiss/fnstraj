@@ -77,11 +77,11 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
 
         if ( launch.getHours() <= 5 ) {
             gfs_hourset = 0;
-        } else if ( launchHour > 5 && launchHour <= 11 ) {
+        } else if ( launch.getHours() > 5 && launch.getHours() <= 11 ) {
             gfs_hourset = 6;
-        } else if ( launchHour > 11 && launchHour <= 17 ) {
+        } else if ( launch.getHours() > 11 && launch.getHours() <= 17 ) {
             gfs_hourset = 12;
-        } else if ( launchHour > 17 && launchHour <= 23 ) {
+        } else if ( launch.getHours() > 17 && launch.getHours() <= 23 ) {
             gfs_hourset = 18;
         }
 
