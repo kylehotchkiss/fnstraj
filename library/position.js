@@ -38,6 +38,9 @@ exports.travel = function( frame, distance, heading ) {
 
 
 exports.distance = function( startLat, startLon, endLat, endLon ) {
+    /////////////////////////////////////////////////////////////////
+    // Distance between two points, Returns distance in Kilometers //
+    /////////////////////////////////////////////////////////////////
     var distanceLat = ( endLat - startLat ) * RADIANS;
     var distanceLon	= ( endLon - startLon ) * RADIANS;
     var lat1		= startLat * RADIANS;

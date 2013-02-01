@@ -19,6 +19,8 @@ var physics  = require('./physics.js');
 var position = require('./position.js');
 
 
+var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
+
 
 ///////////////////////////////////
 // fnstraj Linear Predictor Loop //
@@ -57,7 +59,7 @@ exports.predict = function( flight, parentCallback ) {
         console.log("\033[1;34m\n FNSTRAJ BALLOON TRAJECTORY PREDICTOR\033[0m");
         console.log("   Generating flight path with NOAA " + flight.options.model + " (this will take several minutes)...");
 
-        if ( flight.options.debug ) {
+        if ( fnstraj_debug ) {
             console.log("\n\033[1;37m URL root: http://nomads.ncep.noaa.gov:9090/dods/\033[0m");
         }
     } else {
@@ -151,7 +153,7 @@ exports.predict = function( flight, parentCallback ) {
                         delete flight.flying; delete flight.status;
 
 
-                        if ( flight.options.context === "terminal" && flight.options.debug ) {
+                        if ( fnstraj_debug ) {
                             console.log("\n   Stats: " + JSON.stringify(stats) + "\n");
                         }
 

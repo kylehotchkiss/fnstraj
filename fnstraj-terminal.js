@@ -46,7 +46,6 @@ if ( process.argv.length >= 4 ) {
             model:          model,
             overrideClimb:  false,
 
-            debug:          false,
             resolution:     1
         },
         launch: {

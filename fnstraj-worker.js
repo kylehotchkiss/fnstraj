@@ -27,6 +27,8 @@ var database = require('./library/database.js');
 
 
 var fnstraj_sleep = process.env.FNSTRAJ_SLEEP;
+var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
+
 
 /*
 	flag compatibility will not be easy by any means. We have to get the entire queue, and interate each
@@ -85,7 +87,6 @@ var daemon = function() {
 						flightID: thisID,
 
 						// Optional
-						debug: false,
 						resolution: 1,
 						overrideClimb: overrideClimb
 					}, launch: {
@@ -196,7 +197,9 @@ var sleep = function() {
 (function() {
 	//
 	// Check for
-	// 1) Database config 2) Sleep Config
+	// 1) Database config 
+	// 2) Sleep Config 
+	// 3) Starting offset
 	//
 	daemon();
 })();

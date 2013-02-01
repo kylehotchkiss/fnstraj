@@ -11,3 +11,4 @@ exports/*.json
 
 # Localhost Configuration
 .env
+.env*
