@@ -137,7 +137,7 @@ exports.predict = function( flight, parentCallback ) {
                         //////////////////////////
                         // SYNCHRONOUS ANALYSIS //
                         //////////////////////////
-                        var analysis;
+                        var analysis = {};
                         //analysis.heading = position.heading( table[0].latitude, table[0].longitude, table[table.length - 1].latitude, table[table.length - 1].longitude );
                         analysis.distance = position.distance( table[0].latitude, table[0].longitude, table[table.length - 1].latitude, table[table.length - 1].longitude ); 
                         analysis.midpoint = position.midpoint( table[0].latitude, table[0].longitude, table[table.length - 1].latitude, table[table.length - 1].longitude );
