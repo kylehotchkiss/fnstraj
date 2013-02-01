@@ -133,6 +133,16 @@ exports.predict = function( flight, parentCallback ) {
                         stats.endTime = new Date().getTime();
                         stats.predictorTime = (( stats.endTime - stats.startTime ) / 1000) + "s";
 
+
+                        //////////////////////////
+                        // SYNCHRONOUS ANALYSIS //
+                        //////////////////////////
+                        var analysis;
+                        //analysis.heading = position.heading( table[0].latitude, table[0].longitude, table[table.length - 1].latitude, table[table.length - 1].longitude );
+                        analysis.distance = position.distance( table[0].latitude, table[0].longitude, table[table.length - 1].latitude, table[table.length - 1].longitude ); 
+                        analysis.midpoint = position.midpoint( table[0].latitude, table[0].longitude, table[table.length - 1].latitude, table[table.length - 1].longitude );
+
+
                         /////////////
                         // Cleanup //
                         /////////////
@@ -140,11 +150,13 @@ exports.predict = function( flight, parentCallback ) {
                         delete stats.endTime; delete stats.startTime;
                         delete flight.flying; delete flight.status;
 
+
                         if ( flight.options.context === "terminal" && flight.options.debug ) {
                             console.log("\n   Stats: " + JSON.stringify(stats) + "\n");
                         }
 
-                        output.export(flight, table, stats, parentCallback);
+
+                        output.export(flight, table, analysis, stats, parentCallback);
                     });
                 }
             }

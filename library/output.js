@@ -15,7 +15,7 @@ var database = require('./database.js')
 ////////////////////////////////////////
 // MODULAR FILE EXPORTS (in parallel) //
 ////////////////////////////////////////
-exports.export = function( flight, table, stats, parentCallback ) {
+exports.export = function( flight, table, analysis, stats, parentCallback ) {
 	
 	if ( flight.options.context === "terminal" ) {
 		async.parallel([
@@ -36,7 +36,7 @@ exports.export = function( flight, table, stats, parentCallback ) {
 	} else {
 		async.parallel([
 			function( callback ) {
-				exports.writeDatabase( flight, table, callback );
+				exports.writeDatabase( flight, table, analysis, callback );
 			}
 		], function( error, results ) {
 			parentCallback();
@@ -156,13 +156,13 @@ exports.writeJSON = function( flight, table, callback ) {
 ///////////////////////////////
 // DATABASE (CouchDB) EXPORT //
 ///////////////////////////////
-exports.writeDatabase = function ( flight, table, callback ) {
+exports.writeDatabase = function ( flight, table, analysis, callback ) {
 	//
 	// In the future, this will have to manually append for
 	// multiple prediction support.
 	//
 	var flightID = flight.options.flightID;
-	var content  = { parameters: flight, prediction: [table] };
+	var content  = { parameters: flight, analysis: analysis, prediction: [table] };
 
 	database.write( "/flights/" + flightID, content, function( error ) {
 		if ( typeof error !== "undefined" && error ) {
