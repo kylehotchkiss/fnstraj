@@ -11,11 +11,9 @@ var https       = require("https");
 var querystring = require('querystring');
 
 
-
 var mailgun_key  = process.env.MAILGUN_KEY;
 var mailgun_url  = process.env.MAILGUN_URL;
 var mailgun_from = process.env.MAILGUN_FROM;
-
 
 
 ////////////////////////////////////

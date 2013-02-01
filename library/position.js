@@ -36,7 +36,6 @@ exports.travel = function( frame, distance, heading ) {
 };
 
 
-
 exports.distance = function( startLat, startLon, endLat, endLon ) {
     /////////////////////////////////////////////////////////////////
     // Distance between two points, Returns distance in Kilometers //
@@ -53,10 +52,8 @@ exports.distance = function( startLat, startLon, endLat, endLon ) {
 };
 
 
-
 exports.heading = function( startLat, startLon, endLat, endLon ) {
 };
-
 
 
 exports.midpoint = function( startLat, startLon, endLat, endLon ) {
@@ -77,7 +74,6 @@ exports.midpoint = function( startLat, startLon, endLat, endLon ) {
 };
 
 
-
 exports.ascend = function( currAlt, burstAlt, lift, radius ) {
     //
     // Altitude: Metres
@@ -90,7 +86,6 @@ exports.ascend = function( currAlt, burstAlt, lift, radius ) {
     //
     return Math.sqrt(( lift / 1000 ) * GRAVITY / (.5 * .3 * physics.density(currAlt) * ((( radius * radius ) * Math.PI ) / 10000 )));
 };
-
 
 
 exports.descend = function( currAlt, weight, radius ) {

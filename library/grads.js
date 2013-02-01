@@ -18,7 +18,7 @@ var http  = require("http");
 var async = require('async');
 var position = require('./position.js');
 
-
+var fnstraj_mode = process.env.FNSTRAJ_MODE || "development";
 var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
 
 
@@ -239,7 +239,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 u_url = url.parse(baseURL + modelURL + u_ext);
                 u_res = "";
 
-                if ( fnstraj_debug ) {
+                if ( fnstraj_mode == "development" && fnstraj_debug ) {
                     console.log( "HIT: " + modelURL + u_ext );
                 }
 
@@ -276,7 +276,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                 v_url = url.parse(baseURL + modelURL + v_ext);
                 v_res = "";
 
-                if ( fnstraj_debug ) {
+                if ( fnstraj_mode == "development" && fnstraj_debug ) {
                     console.log( "HIT: " + modelURL + v_ext );
                 }
 

@@ -25,8 +25,8 @@ var fnstraj	 = require('./library/fnstraj.js');
 var helpers	 = require('./library/helpers.js');
 var database = require('./library/database.js');
 
-
-var fnstraj_sleep = process.env.FNSTRAJ_SLEEP;
+var fnstraj_mode = process.env.FNSTRAJ_MODE || "development";
+var fnstraj_sleep = process.env.FNSTRAJ_SLEEP || 3000;
 var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
 
 

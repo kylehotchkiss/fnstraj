@@ -13,7 +13,6 @@ exports.density = function( altitude ) {
         temperature, pressure, pressBase, pressExp;
 
 
-
     //////////////////////////
     // ISA Level Assignment //
     //////////////////////////
@@ -38,7 +37,6 @@ exports.density = function( altitude ) {
         stdTemperature	= 228.65;
         tempLapse		= 0.0028;
     }
-
 
 
     //////////////////////////////////
