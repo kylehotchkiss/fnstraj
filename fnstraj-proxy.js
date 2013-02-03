@@ -54,8 +54,7 @@ proxy.post('/', function( req, res ) {
 				burst: req.body.burst,
 				burstRadius: req.body.burstRadius,
 				launchRadius: req.body.launchRadius
-			},
-			payload: {
+			}, payload: {
 				weight: req.body.weight,
 				chuteRadius: req.body.chuteRadius,
 			}

@@ -49,20 +49,24 @@ var daemon = function() {
 			/////////////////////////////////
 			sleep();
 		} else {
+			var i = 0;
 			var queue = results.rows;
 
 			if ( typeof queue === "object" && typeof queue[0] !== "undefined" ) {
-				//////////////////
-				// DATA SORTING //
-				//////////////////
-				var thisID		= queue[0].id;
-				var thisRev		= queue[0].value.rev;
-				var thisFlight	= queue[0].doc.parameters;
+				////////////////////////////////
+				// CASE: QUEUE FOUND, ADVANCE //
+				////////////////////////////////
+				while ( queue[i].doc.flags.active ) {
+					i++;
+				}
 
 
-				////////////////
-				// TIME SETUP //
-				////////////////
+				////////////////////
+				// INITIALIZATION //
+				////////////////////
+				var thisID = queue[i].id;
+				var thisRev = queue[i].value.rev;
+				var thisFlight = queue[i].doc.parameters;
 				var now = new Date();
 				var timestamp = now.getTime();
 
@@ -81,7 +85,11 @@ var daemon = function() {
 				// FLIGHT OBJECT ESTABLISHMENT //
 				/////////////////////////////////
 				var flight = {
-					options: {
+					flags: {
+						spot: false,
+						active: true,
+						lastActivity: false
+					}, options: {
 						model: thisFlight.options.model,
 						context: "daemon",
 						flightID: thisID,
@@ -106,55 +114,60 @@ var daemon = function() {
 				};
 
 
-				/////////////////////////////////////////
-				// RUN PREDICTOR BASED ON ABOVE OBJECT //
-				/////////////////////////////////////////
-				fnstraj.predict( flight, function( error ) {
+				/////////////////////////////////
+				// Set our ACTIVE flag to TRUE //
+				/////////////////////////////////
+				var setActive = { _rev: thisRev, parameters: flight };
 
-					if ( typeof error !== "undefined" && error ) {
-						/////////////////////////////////////
-						// CASE: PREDICTION FAILED/FORWARD //
-						/////////////////////////////////////
+				database.write('/queue/' + thisID, data, function( error ) { // Do something.
+					/////////////////////////////////////////
+					// RUN PREDICTOR BASED ON ABOVE OBJECT //
+					/////////////////////////////////////////
+					fnstraj.predict( flight, function( error ) {
 
-						/* Until gfs/hd hoursets are stable, we can't requeue with success */
-						database.remove('/queue/' + thisID, thisRev, function( error ) {
-							// We're a bit error agnostic at this point, for some reason.
-							// can we log to database? output.logError would be neat.
+						if ( typeof error !== "undefined" && error ) {
+							/////////////////////////////////////
+							// CASE: PREDICTION FAILED/FORWARD //
+							/////////////////////////////////////
 
-							if ( thisFlight.meta.email !== "" ) {
-								// Too bad if you don't have an email until 0.3.5
-								emailContent = "Hey There,\n\nWe are sad to inform you that your trajectory request did not successfully compile. fnstraj is very new software, and we still have some kinks to work out. We are unable to re-queue your flight at this time, but feel free to try again, with a different model.\n\nThanks for experimenting with us,\n- fnstraj";
+							/* Until gfs/hd hoursets are stable, we can't requeue with success */
+							database.remove('/queue/' + thisID, thisRev, function( error ) {
+								// We're a bit error agnostic at this point, for some reason.
+								// can we log to database? output.logError would be neat.
 
-								helpers.sendMail( thisFlight.meta.email, "fnstraj failed: flight #" + thisID, emailContent);
-							}
-
-							advance();
-						});
-					} else {
-						////////////////////////////
-						// CASE: COMPLETE/FORWARD //
-						////////////////////////////
-						database.remove('/queue/' + thisID, thisRev, function( error ) {
-							if ( typeof error !== "undefined" && error ) {
-								console.log("CRITICAL: Cannot connect to database");
-
-								// Can we do anything about this? We could forever-loop for DB?
-
-								advance();
-							} else {
 								if ( thisFlight.meta.email !== "" ) {
-									emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj";
+									// Too bad if you don't have an email until 0.3.5
+									emailContent = "Hey There,\n\nWe are sad to inform you that your trajectory request did not successfully compile. fnstraj is very new software, and we still have some kinks to work out. We are unable to re-queue your flight at this time, but feel free to try again, with a different model.\n\nThanks for experimenting with us,\n- fnstraj";
 
-									helpers.sendMail( thisFlight.meta.email, "fnstraj prediction: flight #" + thisID, emailContent );
+									helpers.sendMail( thisFlight.meta.email, "fnstraj failed: flight #" + thisID, emailContent);
 								}
 
 								advance();
-							}
-						});
-					}
+							});
+						} else {
+							////////////////////////////
+							// CASE: COMPLETE/FORWARD //
+							////////////////////////////
+							database.remove('/queue/' + thisID, thisRev, function( error ) {
+								if ( typeof error !== "undefined" && error ) {
+									console.log("CRITICAL: Cannot connect to database");
 
+									// Can we do anything about this? We could forever-loop for DB?
+
+									advance();
+								} else {
+									if ( thisFlight.meta.email !== "" ) {
+										emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj";
+
+										helpers.sendMail( thisFlight.meta.email, "fnstraj prediction: flight #" + thisID, emailContent );
+									}
+
+									advance();
+								}
+							});
+						}
+					});
 				});
-
 			} else {
 				//////////////////////////////
 				// CASE: NO ENTRIES/FORWARD //
@@ -197,8 +210,8 @@ var sleep = function() {
 (function() {
 	//
 	// Check for
-	// 1) Database config 
-	// 2) Sleep Config 
+	// 1) Database config
+	// 2) Sleep Config
 	// 3) Starting offset
 	//
 	daemon();
