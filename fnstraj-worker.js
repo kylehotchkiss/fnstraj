@@ -143,7 +143,7 @@ var daemon = function() {
 								advance();
 							} else {
 								if ( thisFlight.meta.email !== "" ) {
-									emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view.php?id=" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj";
+									emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj";
 
 									helpers.sendMail( thisFlight.meta.email, "fnstraj prediction: flight #" + thisID, emailContent );
 								}
