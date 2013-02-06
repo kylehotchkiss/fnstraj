@@ -1,21 +1,13 @@
 # fnstraj
-This is the hardest thing I've ever done.  Node.js-based balloon trajectory predictor. First (and only) trajectory predictor running on NOAA RAP (as far as I know, please correct me if I'm wrong)
+This repository represents the backend for fnstraj, [which is now a webapp for all to use!](http://fnstraj.org/). Feel free to browse around, but if you're looking for a quick trajectory report, the web interface is 1,000x easier than the (now broken) terminal interface.
 
+The frontend code is proprietary for now. If I can get the predictor stable enough (i.e. several hundred lines of error checks), I'll consider publishing the data specs so it can used like an API. It would be pretty neat if this gets popular enough to warrant having its own iOS app. Alas, we dream on.
 
-## Usage
-1. You'll need Node.js and Google Earth to test.
-2. Fork this repo.
-3. `npm install` in the directory.
-4. `node fnstraj-terminal.js [your latitude] [your longitude]`
-5. You will either get an error message or see a list of coordinates. If you see an error message that says something about a time offset, and you don't live in the EST/EDT timezone, please leave a bug report, as I think this may be a bug. If you see a list of coordinates, look in your `exports/` folder, double click the KML - TADA, kinda a trajectory :)
+## Description (simple/tl;dr)
+Does a ton of math, makes cool maps. 
 
-
-## Hacking
-I'm trying to take as minimalistic an approach towards feature cuft as possible. I would personally like to ensure that the core of this app is the highest quality work I am capable of producing. This code has been through two major rewrites before the alpha ever existed! if you would like to hack at the code, go for it! It's not my intension to bring every great feature upstream, but I would love to see what people can turn this codebase into and how they can make it work better for their personal flights and tracking purposes.
-
-
-## Environmental Variables
-Since fnstraj is designed to run as a service in some contexts, some configuration needs to be done via environmental variables. This includes database access information.
+## Description (technical)
+This is written to run as a worker process (or daemon) on Heroku as the processing part of [http://fnstraj.org/](http://fnstraj.org/). It is written in Node.js; uses CouchDB for data services; and works with other neat APIs like Mailgun, The Google Geocoding API, 
 
 ## Special Thanks
 * UKHAS, for your absolutely brilliant web resources on ballooning.
@@ -23,3 +15,4 @@ Since fnstraj is designed to run as a service in some contexts, some configurati
 * Austin Jones, for helping me with these insanely complicated math questions every time I ask.
 * Nathan Hotchkiss, for saying "cool" when I showed you this. And for listening to me talk about it for years.
 * The friends who supported me in this, taking some time to at least see what it does!
+* My old boss at work for encouraging me to try new technologies to make this project happen!
