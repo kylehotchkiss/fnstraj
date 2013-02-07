@@ -231,8 +231,6 @@ var sleep = function() {
 (function() {
 	//
 	// Check for
-	// 1) Database config
-	// 2) Sleep Config
 	// 3) Starting offset
 	//
 
@@ -245,7 +243,7 @@ var sleep = function() {
 		typeof process.env.COUCHDB_USER === "undefined" ||
 		typeof process.env.COUCHDB_PASS === "undefined"
 	) {
-		console.log("Database configuration could not be found in environmental variables. RTFM.");
+		console.log("Database configuration Unavailable! RTFM! ...dies...");
 	} else {
 		
 	}

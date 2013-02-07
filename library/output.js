@@ -11,17 +11,18 @@ var async    = require('async');
 var database = require('./database.js')
 
 
+var fnstraj_mode = process.env.FNSTRAJ_MODE || "development";
+
+
 ////////////////////////////////////////
 // MODULAR FILE EXPORTS (in parallel) //
 ////////////////////////////////////////
 exports.export = function( flight, table, analysis, stats, parentCallback ) {
-	
-	if ( flight.options.context === "terminal" ) {
+	///////////////////////////
+	// CONTEXT-BASED OUTPUTS //
+	///////////////////////////
+	if ( fnstraj_mode === "development" ) {
 		async.parallel([
-			//
-			// Just throw in any other output functions
-			// below and then add them to this array.
-			//
 			function( callback ) {
 				exports.writeCSV( flight, table, callback );
 			}, function( callback ) {
@@ -36,6 +37,8 @@ exports.export = function( flight, table, analysis, stats, parentCallback ) {
 		async.parallel([
 			function( callback ) {
 				exports.writeDatabase( flight, table, analysis, callback );
+			}, function( callback ) {
+				exports.writeStats( flight, stats, callback );
 			}
 		], function( error, results ) {
 			parentCallback();
@@ -177,6 +180,15 @@ exports.writeDatabase = function ( flight, table, analysis, callback ) {
 ///////////////////////////////
 // LOG AND STATISTICS EXPORT //
 ///////////////////////////////
-exports.writeLog = function ( flight, stats, callback ) {
-
+exports.writeStats = function ( flight, stats, callback ) {
+	var flightID = flight.options.flightID;
+	
+	database.write( "/statistics/" + flightID, stats, function( error ) {
+		if ( typeof error !== "undefined" && error ) {
+			// We don't care that much.		
+			callback( true );
+		} else {
+			callback();
+		}
+	});
 }

@@ -4,8 +4,8 @@
  * Copyright 2011-2013 Kyle Hotchkiss
  * Released under the GPL
  *
- * Usage can be found in /defunct/ fnstraj code in Projects/Node.js
- * Callbacks for errors need revise, only one var needed
+ * Needs checkup (HEAD) check to verify that we're good to
+ * continue forward with Daemon execution.
  *
  */
 
@@ -17,10 +17,10 @@ var http = require("http");
 //////////////////////////////////
 // GRAB ENVIRONMENTAL VARIABLES //
 //////////////////////////////////
-var db_host = process.env.CLOUDANT_HOST;
-var db_port = process.env.CLOUDANT_PORT;
-var db_user = process.env.CLOUDANT_USER;
-var db_pass = process.env.CLOUDANT_PASS;
+var db_host = process.env.COUCHDB_HOST;
+var db_port = process.env.COUCHDB_PORT;
+var db_user = process.env.COUCHDB_USER;
+var db_pass = process.env.COUCHDB_PASS;
 
 
 
