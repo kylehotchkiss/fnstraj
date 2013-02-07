@@ -229,11 +229,6 @@ var sleep = function() {
 // Initalization + Preflight //
 ///////////////////////////////
 (function() {
-	//
-	// Check for
-	// 3) Starting offset
-	//
-
 	//////////////////////////////////////////////
 	// Database Configuration and Status Checks //
 	//////////////////////////////////////////////
@@ -245,12 +240,21 @@ var sleep = function() {
 	) {
 		console.log("Database configuration Unavailable! RTFM! ...dies...");
 	} else {
+	
+		if ( typeof process.env.FNSTRAJ_SLEEP === "undefined" ) {
+			console.log("FNSTRAJ_SLEEP was undefined, defaulting to 3 seconds.");
+		}
 		
+		if ( typeof process.argv[2] === "string" && parseInt(process.argv[2]) !== NaN ) {
+			//////////////////////////////////////////////////////
+			// CASE: OFFSET FOUND IN ARGUMENTS, RUN WITH OFFSET //
+			//////////////////////////////////////////////////////
+			
+			setTimeout(function() {
+				daemon();
+			}, ( process.argv[2] * 1000 ));
+		} else {
+			daemon();	
+		}
 	}
-
-	if ( typeof process.env.FNSTRAJ_SLEEP === "undefined" ) {
-		console.log("FNSTRAJ_SLEEP was undefined, defaulting to 3 seconds.");
-	}
-
-	daemon();
 })();

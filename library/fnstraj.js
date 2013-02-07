@@ -31,7 +31,7 @@ exports.predict = function( flight, parentCallback ) {
     // Initialization //
     ////////////////////
     var cache = [];
-    var stats = { frames: 0, gradsHits: 0, cacheHits: 0, startTime: new Date().getTime() };
+    var stats = { model: flight.options.model, frames: 0, gradsHits: 0, cacheHits: 0, startTime: new Date().getTime() };
     var table = [{ latitude: flight.launch.latitude, longitude: flight.launch.longitude, altitude: flight.launch.altitude }];
 
     flight.flying = true;
@@ -56,13 +56,9 @@ exports.predict = function( flight, parentCallback ) {
     //////////////////////////////////////////
     // Pretty-printed Console Notifications //
     //////////////////////////////////////////
-    if ( flight.options.context === "terminal" ) {
-        console.log("\033[1;34m\n FNSTRAJ BALLOON TRAJECTORY PREDICTOR\033[0m");
-        console.log("   Generating flight path with NOAA " + flight.options.model + " (this will take several minutes)...");
-
-        if ( fnstraj_debug ) {
-            console.log("\n\033[1;37m URL root: http://nomads.ncep.noaa.gov:9090/dods/\033[0m");
-        }
+    if ( fnstraj_debug ) {
+        console.log("Predicting: flight #" + flight.options.flightID + " on NOAA " + flight.options.model);
+        console.log("\n\033[1;37m URL root: http://nomads.ncep.noaa.gov:9090/dods/\033[0m");
     } else {
         console.log("Predicting: flight #" + flight.options.flightID);
     }
@@ -123,8 +119,8 @@ exports.predict = function( flight, parentCallback ) {
                     /////////////////////////////////////////////////
                     flight.flying = false;
 
-                    if ( flight.options.context === "terminal") {
-                        console.log("\n   Predictor Complete - See exports/ for results!\n");
+                    if ( fnstraj_mode === "development" ) {
+                        console.log("Predictor Complete - Check /exports for results.");
                     } else {
                         console.log("Complete: flight #" + flight.options.flightID);
                     }
@@ -151,12 +147,7 @@ exports.predict = function( flight, parentCallback ) {
                         /////////////
                         // http://perfectionkills.com/understanding-delete/
                         delete stats.endTime; delete stats.startTime;
-                        delete flight.flying; delete flight.status;
-
-
-                        if ( fnstraj_debug ) {
-                            console.log("\n   Stats: " + JSON.stringify(stats) + "\n");
-                        }
+                        delete flight.flying; delete flight.status; // we may need to var flight = inputFlight up there.
 
 
                         output.export(flight, table, analysis, stats, parentCallback);
