@@ -11,7 +11,7 @@
 ////////////////////////////
 // EXPRESS INITIALIZATION //
 ////////////////////////////
-var hashids   = require('hashids');
+var hashids  = require('hashids');
 var express  = require('express');
 var database = require('./library/database.js');
 var proxy    = express();

@@ -238,7 +238,7 @@ var sleep = function() {
 		typeof process.env.COUCHDB_USER === "undefined" ||
 		typeof process.env.COUCHDB_PASS === "undefined"
 	) {
-		console.log("Database configuration Unavailable! RTFM! ...dies...");
+		console.log("Database configuration unavailable! RTFM! ...dies...");
 	} else {
 	
 		if ( typeof process.env.FNSTRAJ_SLEEP === "undefined" ) {
@@ -249,7 +249,6 @@ var sleep = function() {
 			//////////////////////////////////////////////////////
 			// CASE: OFFSET FOUND IN ARGUMENTS, RUN WITH OFFSET //
 			//////////////////////////////////////////////////////
-			
 			setTimeout(function() {
 				daemon();
 			}, ( process.argv[2] * 1000 ));

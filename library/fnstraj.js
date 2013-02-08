@@ -130,7 +130,7 @@ exports.predict = function( flight, parentCallback ) {
                         // Timer and Outputs //
                         ///////////////////////
                         stats.endTime = new Date().getTime();
-                        stats.predictorTime = (( stats.endTime - stats.startTime ) / 1000) + "s";
+                        stats.predictorTime = (( stats.endTime - stats.startTime ) / 1000);
 
 
                         //////////////////////////
