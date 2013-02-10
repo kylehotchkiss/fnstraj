@@ -26,13 +26,14 @@ var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
 ///////////////////////////////////
 // fnstraj Linear Predictor Loop //
 ///////////////////////////////////
-exports.predict = function( flight, parentCallback ) {
+exports.predict = function( inputFlight, parentCallback ) {
     ////////////////////
     // Initialization //
     ////////////////////
     var cache = [];
     var stats = { model: flight.options.model, frames: 0, gradsHits: 0, cacheHits: 0, startTime: new Date().getTime() };
     var table = [{ latitude: flight.launch.latitude, longitude: flight.launch.longitude, altitude: flight.launch.altitude }];
+    var flight = inputFlight; // so we can DELETE later.
 
     flight.flying = true;
 
@@ -138,16 +139,20 @@ exports.predict = function( flight, parentCallback ) {
                         //////////////////////////
                         var analysis = {};
                         //analysis.heading = position.heading( table[0].latitude, table[0].longitude, table[table.length - 1].latitude, table[table.length - 1].longitude );
-                        analysis.distance = position.distance( table[0].latitude, table[0].longitude, table[table.length - 1].latitude, table[table.length - 1].longitude ); 
+                        analysis.distance = position.distance( table[0].latitude, table[0].longitude, table[table.length - 1].latitude, table[table.length - 1].longitude );
                         analysis.midpoint = position.midpoint( table[0].latitude, table[0].longitude, table[table.length - 1].latitude, table[table.length - 1].longitude );
+
+
+                        ///////////////////////////
+                        // ASYNCHRONOUS ANALYSIS //
+                        ///////////////////////////
 
 
                         /////////////
                         // Cleanup //
                         /////////////
-                        // http://perfectionkills.com/understanding-delete/
                         delete stats.endTime; delete stats.startTime;
-                        delete flight.flying; delete flight.status; // we may need to var flight = inputFlight up there.
+                        delete flight.flying; delete flight.status;
 
 
                         output.export(flight, table, analysis, stats, parentCallback);

@@ -102,6 +102,10 @@ var daemon = function() {
 							spot: false,
 							active: true,
 							lastActivity: false
+						}, meta: {
+							name: thisFlight.meta.name,
+							email: thisFlight.meta.email,
+							program: thisFlight.meta.program
 						}, options: {
 							model: thisFlight.options.model,
 							context: "daemon",
