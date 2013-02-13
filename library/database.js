@@ -53,7 +53,7 @@ exports.read = function( path, callback ) {
             callback( results );
         });
     }).on("error", function() {
-        callback( true );
+        callback( false, true );
     });
 };
 
@@ -86,7 +86,7 @@ exports.write = function( path, data, callback ) {
                 callback();
             }
         }).on("error", function() {
-              callback( true );
+              callback( false, true );
         });
 
         couchdb.write( JSON.stringify(data) );
@@ -113,7 +113,7 @@ exports.remove = function( path, rev, callback ) {
         }
     }).on("error", function() {
         if ( typeof callback !== "undefined" ) {
-            callback( true );
+            callback( false, true );
         }
     });
 
