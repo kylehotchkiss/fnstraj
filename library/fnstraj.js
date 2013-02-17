@@ -30,10 +30,10 @@ exports.predict = function( inputFlight, parentCallback ) {
     ////////////////////
     // Initialization //
     ////////////////////
+    var flight = inputFlight; // so we can DELETE later.
     var cache = [];
     var stats = { model: flight.options.model, frames: 0, gradsHits: 0, cacheHits: 0, startTime: new Date().getTime() };
     var table = [{ latitude: flight.launch.latitude, longitude: flight.launch.longitude, altitude: flight.launch.altitude }];
-    var flight = inputFlight; // so we can DELETE later.
 
     flight.flying = true;
 
