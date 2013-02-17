@@ -19,7 +19,6 @@ var physics  = require('./physics.js');
 var position = require('./position.js');
 
 
-var fnstraj_mode = process.env.FNSTRAJ_MODE || "development";
 var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
 
 
@@ -120,11 +119,7 @@ exports.predict = function( inputFlight, parentCallback ) {
                     /////////////////////////////////////////////////
                     flight.flying = false;
 
-                    if ( fnstraj_mode === "development" ) {
-                        console.log("Predictor Complete - Check /exports for results.");
-                    } else {
-                        console.log("Complete: flight #" + flight.options.flightID);
-                    }
+                    console.log("Complete: flight #" + flight.options.flightID);
 
                     process.nextTick(function() {
                         ///////////////////////

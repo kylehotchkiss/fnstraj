@@ -11,9 +11,6 @@ var async    = require('async');
 var database = require('./database.js')
 
 
-var fnstraj_mode = process.env.FNSTRAJ_MODE || "development";
-
-
 ////////////////////////////////////////
 // MODULAR FILE EXPORTS (in parallel) //
 ////////////////////////////////////////
@@ -21,7 +18,10 @@ exports.export = function( flight, table, analysis, stats, parentCallback ) {
 	///////////////////////////
 	// CONTEXT-BASED OUTPUTS //
 	///////////////////////////
-	if ( fnstraj_mode === "development" ) {
+	if ( false ) {
+		////////////////////////////////////////////////////////////
+		// We'll figure out something else for these file outputs //
+		////////////////////////////////////////////////////////////
 		async.parallel([
 			function( callback ) {
 				exports.writeCSV( flight, table, callback );
@@ -32,7 +32,7 @@ exports.export = function( flight, table, analysis, stats, parentCallback ) {
 			}
 		], function( error, results ) {
 			parentCallback();
-		});	
+		});
 	} else {
 		async.parallel([
 			function( callback ) {
@@ -42,7 +42,7 @@ exports.export = function( flight, table, analysis, stats, parentCallback ) {
 			}
 		], function( error, results ) {
 			parentCallback();
-		});		
+		});
 	}
 
 }
@@ -168,7 +168,7 @@ exports.writeDatabase = function ( flight, table, analysis, callback ) {
 
 	database.write( "/flights/" + flightID, content, function( error ) {
 		if ( typeof error !== "undefined" && error ) {
-			console.log("  databasefail: " + error.message);			
+			console.log("  databasefail: " + error.message);
 			callback( true );
 		} else {
 			callback();
@@ -182,10 +182,10 @@ exports.writeDatabase = function ( flight, table, analysis, callback ) {
 ///////////////////////////////
 exports.writeStats = function ( flight, stats, callback ) {
 	var flightID = flight.options.flightID;
-	
+
 	database.write( "/statistics/" + flightID, stats, function( error ) {
 		if ( typeof error !== "undefined" && error ) {
-			// We don't care that much.		
+			// We don't care that much.
 			callback( true );
 		} else {
 			callback();
