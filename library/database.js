@@ -31,7 +31,7 @@ exports.read = function( path, callback ) {
     if ( path.substr(-1) === "/" ) {
         // CASE: URL is a listing OR view... what shall we do
 
-        path += "_all_docs?include_docs=true";
+        path += "_all_docs?include_docs=true&descending=true";
     }
 
     var buffer = "";
