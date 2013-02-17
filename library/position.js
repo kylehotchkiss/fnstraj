@@ -20,6 +20,10 @@ var GRAVITY = 9.80665;
 
 
 exports.travel = function( frame, distance, heading ) {
+    //////////////////////////////////////////////////////
+    // Take a set of coordinates, distance, and heading //
+    // return new coordinates. May be sloppy interface? //
+    //////////////////////////////////////////////////////
     radius   = (6367500 + frame.altitude) * RADIANS;
     oldLat   = frame.latitude * RADIANS;
     oldLon   = frame.longitude * RADIANS;
@@ -53,6 +57,18 @@ exports.distance = function( startLat, startLon, endLat, endLon ) {
 
 
 exports.heading = function( startLat, startLon, endLat, endLon ) {
+    ///////////////////////////////////////
+    // Final Bearing from Start Location //
+    ///////////////////////////////////////
+    var distanceLat = ( endLat - startLat ) * RADIANS;
+    var distanceLon	= ( endLon - startLon ) * RADIANS;
+    var lat1		= startLat * RADIANS;
+    var lat2		= endLat * RADIANS;
+
+    var y = Math.sin(distanceLon) * Math.cos(lat2);
+    var x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(distanceLon);
+
+    return Math.atan2(y, x) * DEGREES;
 };
 
 
@@ -80,8 +96,8 @@ exports.ascend = function( currAlt, burstAlt, lift, radius ) {
     // Lift: Kilograms
     // Radius: Metres (?)
     //
-    // *needs to account for balloon radius expansion* 
-    // Ascent rate should be near-constant (or mentally average-able) 
+    // *needs to account for balloon radius expansion*
+    // Ascent rate should be near-constant (or mentally average-able)
     // when this is properly accounted for
     //
     return Math.sqrt(( lift / 1000 ) * GRAVITY / (.5 * .3 * physics.density(currAlt) * ((( radius * radius ) * Math.PI ) / 10000 )));
