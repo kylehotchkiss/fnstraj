@@ -217,7 +217,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                     u_url = url.parse(baseURL + modelURL + u_ext);
                     u_res = "";
 
-                    if ( fnstraj_debug ) {
+                    if ( fnstraj_debug === "true" ) {
                         console.log( "HIT: " + modelURL + u_ext );
                     }
 
@@ -254,7 +254,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                     v_url = url.parse(baseURL + modelURL + v_ext);
                     v_res = "";
 
-                    if ( fnstraj_debug ) {
+                    if ( fnstraj_debug === "true" ) {
                         console.log( "HIT: " + modelURL + v_ext );
                     }
 
@@ -294,7 +294,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                     // What's that? your innocent mind ponders. It's the end,
                     // I answer, wallowing in all my lost predictions.
                     //
-                    if ( fnstraj_debug ) { // context!
+                    if ( fnstraj_debug === "true" ) {
                         console.log("\n\033[1;31mGrADS Fail:\033[0m");
 
                         var u_errorStart = results.u_wind.indexOf("because of the following error:<p>\n<b>") + 38;

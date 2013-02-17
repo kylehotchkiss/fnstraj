@@ -56,11 +56,10 @@ exports.predict = function( inputFlight, parentCallback ) {
     //////////////////////////////////////////
     // Pretty-printed Console Notifications //
     //////////////////////////////////////////
-    if ( fnstraj_debug ) {
-        console.log("Predicting: flight #" + flight.options.flightID + " on NOAA " + flight.options.model);
-        console.log("\n\033[1;37m URL root: http://nomads.ncep.noaa.gov:9090/dods/\033[0m");
-    } else {
-        console.log("Predicting: flight #" + flight.options.flightID);
+    console.log("Predicting: flight #" + flight.options.flightID + " on NOAA " + flight.options.model);
+    
+    if ( fnstraj_debug === "true" ) {
+        console.log("URL root: http://nomads.ncep.noaa.gov:9090/dods/");
     }
 
 
