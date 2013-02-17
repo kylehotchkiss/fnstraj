@@ -136,7 +136,7 @@ var daemon = function() {
 					/////////////////////////////////
 					var setActive = { _rev: thisRev, parameters: flight };
 
-					database.write('/queue/' + thisID, setActive, function( error ) { // Do something.
+					database.write('/queue/' + thisID, setActive, function( revision, error ) { // Do something.
 
 						if ( thisFlight.flags.spot ) {
 							// just crash for now, whatevs.
@@ -152,7 +152,7 @@ var daemon = function() {
 									/////////////////////////////////////
 
 									/* Until gfs/hd hoursets are stable, we can't requeue with success */
-									database.remove('/queue/' + thisID, thisRev, function( error ) {
+									database.remove('/queue/' + thisID, revision, function( error ) {
 										// We're a bit error agnostic at this point, for some reason.
 										// can we log to database? output.logError would be neat.
 
@@ -169,7 +169,7 @@ var daemon = function() {
 									////////////////////////////
 									// CASE: COMPLETE/FORWARD //
 									////////////////////////////
-									database.remove('/queue/' + thisID, thisRev, function( error ) {
+									database.remove('/queue/' + thisID, thisRev, function( error ) { // THISREV IS NOT LATEST
 										if ( typeof error !== "undefined" && error ) {
 											console.log("CRITICAL: Cannot connect to database");
 
@@ -244,11 +244,11 @@ var sleep = function() {
 	) {
 		console.log("Database configuration unavailable! RTFM! ...dies...");
 	} else {
-	
+
 		if ( typeof process.env.FNSTRAJ_SLEEP === "undefined" ) {
 			console.log("FNSTRAJ_SLEEP was undefined, defaulting to 3 seconds.");
 		}
-		
+
 		if ( typeof process.argv[2] === "string" && parseInt(process.argv[2]) !== NaN ) {
 			//////////////////////////////////////////////////////
 			// CASE: OFFSET FOUND IN ARGUMENTS, RUN WITH OFFSET //
@@ -257,7 +257,7 @@ var sleep = function() {
 				daemon();
 			}, ( process.argv[2] * 1000 ));
 		} else {
-			daemon();	
+			daemon();
 		}
 	}
 })();

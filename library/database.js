@@ -38,7 +38,7 @@ exports.read = function( path, callback ) {
     var couchdb = http.get({
         auth: db_user + ":" + db_pass,
         host: db_host,
-        path: path, 
+        path: path,
         port: db_port
     }, function( response ) {
         response.setEncoding('utf8');
@@ -74,6 +74,7 @@ exports.write = function( path, data, callback ) {
             }
         }
 
+        var buffer = "";
         var couchdb = http.request({
             auth: db_user + ":" + db_pass,
             host: db_host,
@@ -81,10 +82,20 @@ exports.write = function( path, data, callback ) {
             port: db_port,
             headers: { "Content-Type": "application/json" },
             method: "PUT"
-        }, function() {
-            if ( typeof callback !== "undefined") {
-                callback();
-            }
+        }, function( response ) {
+            response.setEncoding('utf8');
+
+            response.on("data", function( data ) {
+                buffer += data;
+            });
+
+            response.on("end", function() {
+                var results = JSON.parse( buffer );
+
+                if ( typeof callback !== "undefined") {
+                    callback( results.rev );
+                }
+            });
         }).on("error", function() {
               callback( false, true );
         });
