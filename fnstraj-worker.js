@@ -169,7 +169,7 @@ var daemon = function() {
 									////////////////////////////
 									// CASE: COMPLETE/FORWARD //
 									////////////////////////////
-									database.remove('/queue/' + thisID, thisRev, function( error ) { // THISREV IS NOT LATEST
+									database.remove('/queue/' + thisID, revision, function( error ) { // THISREV IS NOT LATEST
 										if ( typeof error !== "undefined" && error ) {
 											console.log("CRITICAL: Cannot connect to database");
 
