@@ -155,8 +155,6 @@ exports.predict = function( inputFlight, parentCallback ) {
                                 helpers.coordsToCity(table[table.length - 1].latitude, table[table.length - 1].longitude, callback);
                             }
                         ], function( error, results ) {
-                        
-                            console.log( results );
                             
                             if ( results[0] ) {
                                 flight.points.launch = { name: results[0] };    
