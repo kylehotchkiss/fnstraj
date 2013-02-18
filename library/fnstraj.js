@@ -16,6 +16,7 @@ var async    = require('async');
 var grads    = require('./grads.js');
 var output   = require('./output.js');
 var physics  = require('./physics.js');
+var helpers  = require('./helpers.js');
 var position = require('./position.js');
 
 
@@ -126,6 +127,13 @@ exports.predict = function( inputFlight, parentCallback ) {
                         ///////////////////////
                         stats.endTime = new Date().getTime();
                         stats.predictorTime = (( stats.endTime - stats.startTime ) / 1000);
+                        
+                        
+                        /////////////
+                        // Cleanup //
+                        /////////////
+                        delete stats.endTime; delete stats.startTime;
+                        delete flight.flying; delete flight.status;
 
 
                         //////////////////////////
@@ -140,16 +148,27 @@ exports.predict = function( inputFlight, parentCallback ) {
                         ///////////////////////////
                         // ASYNCHRONOUS ANALYSIS //
                         ///////////////////////////
-
-
-                        /////////////
-                        // Cleanup //
-                        /////////////
-                        delete stats.endTime; delete stats.startTime;
-                        delete flight.flying; delete flight.status;
-
-
-                        output.export(flight, table, analysis, stats, parentCallback);
+                        async.parallel([
+                            function( callback ) {
+                                helpers.coordsToCity(table[0].latitude, table[0].longitude, callback);
+                            }, function( callback ) {
+                                helpers.coordsToCity(table[table.length - 1].latitude, table[table.length - 1].longitude, callback);
+                            }
+                        ], function( error, results ) {
+                        
+                            console.log( results );
+                            
+                            if ( results[0] ) {
+                                flight.points.launch = { name: results[0] };    
+                            }
+                            
+                            if ( results[1] ) {
+                                flight.points.landing = { name: results[1] };
+                            }
+                        
+                            output.export(flight, table, analysis, stats, parentCallback);
+                            
+                        });
                     });
                 }
             }

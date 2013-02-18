@@ -20,6 +20,11 @@ var mailgun_from = process.env.MAILGUN_FROM;
 // Locality name from Coordinates //
 ////////////////////////////////////
 exports.coordsToCity = function( latitude, longitude, callback ) {
+    /////////////////////////////////////////////////////////
+    // This will only be used in Async.parallel contexts   //
+    // API is coded for this accordiningly                 //
+    // DO NOT EXPORT (Working model in Codebox for Export) //
+    /////////////////////////////////////////////////////////
 	var location = "";
 
 	var geocode = http.get({
@@ -41,22 +46,22 @@ exports.coordsToCity = function( latitude, longitude, callback ) {
 
 				for ( level in components ) {
 					if (components[level].types[0] === "administrative_area_level_2" || components[level].types[0] === "administrative_area_level_1" ) {
-						locale = components[level].short_name;
+						locale = components[level].long_name;
 
 						break;
 					}
 				}
 
-				callback( locale );
+				callback( null, locale );
 
 			} else {
-				callback();
+				callback( true );
 		   }
 	   });
 	});
 
 	geocode.on('error', function() {
-		callback();
+		callback( true );
 	});
 }
 
