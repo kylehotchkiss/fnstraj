@@ -26,7 +26,7 @@ var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
 ////////////////////////////////////////
 var daemon = function() {
 
-	database.read('/queue/', function( results, error ) {
+	database.read('/fnstraj-queue/', function( results, error ) {
 		if ( typeof error !== "undefined" && error ) {
 			/////////////////////////////////
 			// CASE: DATABASE DOWN/FORWARD //
@@ -136,7 +136,7 @@ var daemon = function() {
 					/////////////////////////////////
 					var setActive = { _rev: thisRev, parameters: flight };
 
-					database.write('/queue/' + thisID, setActive, function( revision, error ) { // Do something.
+					database.write('/fnstraj-queue/' + thisID, setActive, function( revision, error ) { // Do something.
 
 						if ( thisFlight.flags.spot ) {
 							// just crash for now, whatevs.
@@ -152,7 +152,7 @@ var daemon = function() {
 									/////////////////////////////////////
 
 									/* Until gfs/hd hoursets are stable, we can't requeue with success */
-									database.remove('/queue/' + thisID, revision, function( error ) {
+									database.remove('/fnstraj-queue/' + thisID, revision, function( error ) {
 										// We're a bit error agnostic at this point, for some reason.
 										// can we log to database? output.logError would be neat.
 
@@ -169,7 +169,7 @@ var daemon = function() {
 									////////////////////////////
 									// CASE: COMPLETE/FORWARD //
 									////////////////////////////
-									database.remove('/queue/' + thisID, revision, function( error ) { // THISREV IS NOT LATEST
+									database.remove('/fnstraj-queue/' + thisID, revision, function( error ) { // THISREV IS NOT LATEST
 										if ( typeof error !== "undefined" && error ) {
 											console.log("CRITICAL: Cannot connect to database");
 

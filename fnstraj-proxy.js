@@ -61,7 +61,7 @@ proxy.post('/', function( req, res ) {
 		}
 	};
 
-	database.write('/queue/' + flightID, content, function( error ) {
+	database.write('/fnstraj-queue/' + flightID, content, function( error ) {
 		if ( typeof error !== "undefined" && error ) {
 			console.log("  databasefail: " + error.message);
 

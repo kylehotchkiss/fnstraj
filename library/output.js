@@ -166,7 +166,7 @@ exports.writeDatabase = function ( flight, table, analysis, callback ) {
 	var flightID = flight.options.flightID;
 	var content  = { parameters: flight, analysis: analysis, prediction: [table] };
 
-	database.write( "/flights/" + flightID, content, function( revision, error ) {
+	database.write( "/fnstraj-flights/" + flightID, content, function( revision, error ) {
 		if ( typeof error !== "undefined" && error ) {
 			console.log("  databasefail: " + error.message);
 			callback( true );
@@ -183,7 +183,7 @@ exports.writeDatabase = function ( flight, table, analysis, callback ) {
 exports.writeStats = function ( flight, stats, callback ) {
 	var flightID = flight.options.flightID;
 
-	database.write( "/statistics/" + flightID, stats, function( revision, error ) {
+	database.write( "/fnstraj-statistics/" + flightID, stats, function( revision, error ) {
 		if ( typeof error !== "undefined" && error ) {
 			// We don't care that much.
 			callback( true );
