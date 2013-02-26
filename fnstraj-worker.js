@@ -9,8 +9,8 @@
  *
  */
 
-
 var async	 = require('async');
+var spot     = require('./library/spot.js');
 var fnstraj	 = require('./library/fnstraj.js');
 var helpers	 = require('./library/helpers.js');
 var database = require('./library/database.js');
@@ -87,7 +87,8 @@ var daemon = function() {
 					/////////////////////
 					// OPTIONS PARSING //
 					/////////////////////
-					if ( typeof thisFlight.options.overrideClimb !== "undefined" && thisFlight.options.overrideClimb ) {
+					if ( typeof thisFlight.options.overrideClimb !== "undefined" && thisFlight.options.overrideClimb ) { 
+						// This isn't an option that would be forwarded from the queue. Consider removing/Depricate
 						overrideClimb = true;
 					} else {
 						overrideClimb = false;
@@ -134,17 +135,85 @@ var daemon = function() {
 					/////////////////////////////////
 					// Set our ACTIVE flag to TRUE //
 					/////////////////////////////////
-					var setActive = { _rev: thisRev, parameters: flight };
+					var setActive = { _rev: thisRev, parameters: flight }; // revision data should be handled in the database, not here.
 
-					database.write('/fnstraj-queue/' + thisID, setActive, function( revision, error ) { // Do something.
+					database.write('/fnstraj-queue/' + thisID, setActive, function( revision, error ) { // Do something about errors
 
 						if ( thisFlight.flags.spot ) {
-							// just crash for now, whatevs.
+							
+							// 1 check spot for updates, write them down, notify if new points
+							// 2 get latest point, predict on top
+							// 3 write to db
+							// 4 set active flag off
+							// 5 turn off after 20 or so runs / 2hrs no update / landing detected
+							
+							
+							spot.getTracking( thisflight.flags.spot, function( tracking, error ) {
+								
+								if ( typeof error !== "undefined" && error ) {
+									//////////////////////////////////
+									// CASE: POINTS UNAVAILABLE/DIE //
+									//////////////////////////////////
+									
+									// not closing active flag here, RED FLAG
+									
+									advance();
+								} else {
+									////////////////////////////////////////
+									// CASE: TRACKING DATA EXISTS/FORWARD //
+									////////////////////////////////////////
+									database.read('/fnstraj-flights/' + thisID, function( spotBase, error ) {
+										if ( typeof error !== "undefined" && error ) {
+											
+										} else {
+										
+											// decide if flight exists, if yes, work from last point,
+											// if not, launch from base.
+											
+											// below code assumes flight exists
+											
+											// if noflight
+											
+											
+											var repredict = spot.processTracking( tracking, spotBase );
+											
+											if ( repredict ) {
+												//////////////////////////////////////////
+												// CASE: REPREDICT FROM LAST SPOT POINT //
+												//////////////////////////////////////////	
+												if ( spot.determineOverride( tracking, spotBase ) ) {
+													
+												}
+												
+												spotBase.parameters.launch.latitude  = spotBase.flightpath[repredict].latitude;
+												spotBase.parameters.launch.longitude = spotBase.flightpath[repredict].longitude;
+												spotBase.parameters.launch.altitude  = spotbase.projection[repredict].altitude;
+												spotBase.parameters.launch.timestamp += repredict * 60000; 
+												
+												fnstraj.predict( spotBase, tracking, function( error ) {
+													
+													if ( typeof error !== "undefined" && error ) {
+														
+													} else {
+														
+														// We need to keep the queue item above for here, since we're just resetting the 
+														// flag and setting it back to idle
+														
+													}
+														
+												});
+											}
+											
+										}
+									});
+								}
+							});
+							
 						} else {
-							/////////////////////////////////////////
+							//////////////////////////////////////////
 							// RUN PREDICTOR BASED ON FLIGHT OBJECT //
-							/////////////////////////////////////////
-							fnstraj.predict( flight, function( error ) {
+							//////////////////////////////////////////
+							fnstraj.predict( flight, false, function( error ) {
 
 								if ( typeof error !== "undefined" && error ) {
 									/////////////////////////////////////

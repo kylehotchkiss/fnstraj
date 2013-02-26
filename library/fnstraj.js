@@ -26,7 +26,7 @@ var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
 ///////////////////////////////////
 // fnstraj Linear Predictor Loop //
 ///////////////////////////////////
-exports.predict = function( inputFlight, parentCallback ) {
+exports.predict = function( inputFlight, tracking, parentCallback ) {
     ////////////////////
     // Initialization //
     ////////////////////
@@ -80,7 +80,7 @@ exports.predict = function( inputFlight, parentCallback ) {
             var timestep = flight.launch.timestamp + ((table.length - 1 ) * 1000); // Add +1 minute for every frame. In the future, this may be dynamic.
 
             if ( flight.status === "ascending" ) {
-                var ascended = 5; //position.ascend( table[table.length - 1].altitude, flight.balloon.burst, flight.balloon.lift, flight.balloon.radius );
+                var ascended = position.ascend( table[0].altitude, table[table.length - 1].altitude, flight.balloon.burst, flight.balloon.lift, flight.balloon.launchRadius, flight.balloon.burstRadius );
                 var currAlt = ( ascended * 60 ) + table[table.length - 1].altitude; // CONSTANT TO VARIABLE: Percision
 
                 if ( currAlt < flight.balloon.burst ) {
@@ -95,15 +95,15 @@ exports.predict = function( inputFlight, parentCallback ) {
                     // Logic flow: transision to descent mode. //
                     /////////////////////////////////////////////
                     flight.points = {
-                        burst: { latitude: table[table.length - 1].latitude, longitude: table[table.length - 1].longitude, altitude: table[table.length - 1].altitude }
-                    };
+                        burst: { latitude: table[table.length - 1].latitude, longitude: table[table.length - 1].longitude, altitude: table[table.length - 1].altitude, index: stats.frames }
+                    }
 
                     flight.status = "descending";
 
                     callback();
                 }
             } else if ( flight.status === "descending" ) {
-                var descended = 5;
+                var descended = position.descend( table[table.length - 1].altitude, flight.payload.weight, flight.payload.chuteRadius );
                 var currAlt = table[table.length - 1].altitude - ( descended * 60 ); // CONSTANT TO VARIABLE: Precision
 
                 if ( currAlt > 0 ) {
@@ -134,6 +134,8 @@ exports.predict = function( inputFlight, parentCallback ) {
                         /////////////
                         delete stats.endTime; delete stats.startTime;
                         delete flight.flying; delete flight.status;
+                        
+                        // reset launch to table[0];
 
 
                         //////////////////////////
@@ -164,7 +166,15 @@ exports.predict = function( inputFlight, parentCallback ) {
                                 flight.points.landing = { name: results[1] };
                             }
                         
-                            output.export(flight, table, analysis, stats, parentCallback);
+                        
+                            /////////////////////////////////
+                            // OUTPUT AND RETURN TO CALLER //
+                            /////////////////////////////////
+                            if ( tracking ) {
+                                output.export( flight, table, tracking, analysis, stats, parentCallback );
+                            } else {
+                                output.export( flight, table, false, analysis, stats, parentCallback );
+                            }
                             
                         });
                     });

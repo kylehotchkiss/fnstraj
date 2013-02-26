@@ -12,47 +12,9 @@ var database = require('./database.js')
 
 
 ////////////////////////////////////////
-// MODULAR FILE EXPORTS (in parallel) //
-////////////////////////////////////////
-exports.export = function( flight, table, analysis, stats, parentCallback ) {
-	///////////////////////////
-	// CONTEXT-BASED OUTPUTS //
-	///////////////////////////
-	if ( false ) {
-		////////////////////////////////////////////////////////////
-		// We'll figure out something else for these file outputs //
-		////////////////////////////////////////////////////////////
-		async.parallel([
-			function( callback ) {
-				exports.writeCSV( flight, table, callback );
-			}, function( callback ) {
-				exports.writeKML( flight, table, callback );
-			}, function( callback ) {
-				exports.writeJSON( flight, table, callback );
-			}
-		], function( error, results ) {
-			parentCallback();
-		});
-	} else {
-		async.parallel([
-			function( callback ) {
-				exports.writeDatabase( flight, table, analysis, callback );
-			}, function( callback ) {
-				exports.writeStats( flight, stats, callback );
-			}
-		], function( error, results ) {
-			parentCallback();
-		});
-	}
-
-}
-
-
-
-////////////////////////////////////////
 // CSV (Comma Seperated Value) EXPORT //
 ////////////////////////////////////////
-exports.writeCSV = function( flight, table, callback ) {
+var writeCSV = function( flight, table, callback ) {
 	var content = "";
 
 	var flightID = flight.options.flightID;
@@ -72,11 +34,10 @@ exports.writeCSV = function( flight, table, callback ) {
 }
 
 
-
 ///////////////////////////////
 // KML (Google Earth) EXPORT //
 ///////////////////////////////
-exports.writeKML = function( flight, table, callback ) {
+var writeKML = function( flight, table, callback ) {
 	var color;
 
 	var model = flight.options.model;
@@ -119,8 +80,8 @@ exports.writeKML = function( flight, table, callback ) {
 
 	fileContents += "\
 				</coordinates>\n\
-        	</LineString>\n\
-    	</Placemark>\n\
+			</LineString>\n\
+		</Placemark>\n\
 	</Document>\n\
 </kml>";
 
@@ -135,11 +96,10 @@ exports.writeKML = function( flight, table, callback ) {
 }
 
 
-
 ///////////////////////////////////////
 // JSON (fnstraj file format) EXPORT //
 ///////////////////////////////////////
-exports.writeJSON = function( flight, table, callback ) {
+var writeJSON = function( flight, table, callback ) {
 	var flightID = flight.options.flightID;
 	var content = JSON.stringify( table );
 
@@ -154,17 +114,20 @@ exports.writeJSON = function( flight, table, callback ) {
 }
 
 
-
 ///////////////////////////////
 // DATABASE (CouchDB) EXPORT //
 ///////////////////////////////
-exports.writeDatabase = function ( flight, table, analysis, callback ) {
+var writeDatabase = function ( flight, table, tracking, analysis, callback ) {
 	//
 	// In the future, this will have to manually append for
 	// multiple prediction support.
 	//
 	var flightID = flight.options.flightID;
-	var content  = { parameters: flight, analysis: analysis, prediction: [table] };
+	var content  = { parameters: flight, analysis: analysis, prediction: table };
+	
+	if ( tracking ) {
+		content.flightpath = tracking;
+	}
 
 	database.write( "/fnstraj-flights/" + flightID, content, function( revision, error ) {
 		if ( typeof error !== "undefined" && error ) {
@@ -180,7 +143,7 @@ exports.writeDatabase = function ( flight, table, analysis, callback ) {
 ///////////////////////////////
 // LOG AND STATISTICS EXPORT //
 ///////////////////////////////
-exports.writeStats = function ( flight, stats, callback ) {
+var writeStats = function ( flight, stats, callback ) {
 	var flightID = flight.options.flightID;
 
 	database.write( "/fnstraj-statistics/" + flightID, stats, function( revision, error ) {
@@ -191,4 +154,45 @@ exports.writeStats = function ( flight, stats, callback ) {
 			callback();
 		}
 	});
+}
+
+
+////////////////////////////////////////
+// MODULAR FILE EXPORTS (in parallel) //
+////////////////////////////////////////
+exports.export = function( flight, table, tracking, analysis, stats, parentCallback ) {
+	///////////////////////////
+	// CONTEXT-BASED OUTPUTS //
+	///////////////////////////
+	if ( false ) {
+		////////////////////////////////////////////////////////////
+		// We'll figure out something else for these file outputs //
+		////////////////////////////////////////////////////////////
+		async.parallel([
+			function( callback ) {
+				writeCSV( flight, table, callback );
+			}, function( callback ) {
+				writeKML( flight, table, callback );
+			}, function( callback ) {
+				writeJSON( flight, table, callback );
+			}
+		], function( error, results ) {
+			parentCallback();
+		});
+	} else {
+		async.parallel([
+			function( callback ) {
+				if ( tracking ) {
+					writeDatabase( flight, table, tracking, analysis, callback );
+				} else {
+					writeDatabase( flight, table, false, analysis, callback );
+				}
+			}, function( callback ) {
+				writeStats( flight, stats, callback );
+			}
+		], function( error, results ) {
+			parentCallback();
+		});
+	}
+
 }

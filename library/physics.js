@@ -27,6 +27,9 @@ exports.density = function( altitude ) {
         stdTemperature	= 216.65;
         tempLapse		= 0;
     } else if ( altitude >= 20063 && altitude < 32162 ) {
+        //
+        // ERROR PRONE
+        //
         baseAlt			= 20063;
         stdPressure		= 5474.9;
         stdTemperature	= 216.65;

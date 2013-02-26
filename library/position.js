@@ -73,6 +73,9 @@ exports.heading = function( startLat, startLon, endLat, endLon ) {
 
 
 exports.midpoint = function( startLat, startLon, endLat, endLon ) {
+    //////////////////////////////////////////////
+    // Midpoint between two sets of coordinates //
+    //////////////////////////////////////////////
     var distanceLon	= ( endLon - startLon ) * RADIANS;
 
     startLat = startLat * RADIANS;
@@ -90,17 +93,23 @@ exports.midpoint = function( startLat, startLon, endLat, endLon ) {
 };
 
 
-exports.ascend = function( currAlt, burstAlt, lift, radius ) {
+exports.ascend = function( launchAlt, currAlt, burstAlt, lift, launchRadius, burstRadius ) {
+    ///////////////////////////////////////////
+    // Ascent Speed Given Various Conditions //
+    ///////////////////////////////////////////
+    
     //
-    // Altitude: Metres
-    // Lift: Kilograms
-    // Radius: Metres (?)
+    // UNITS:
+    // - Altitudes: Metres
+    // - Lift: Grams
+    // - Radiuses: Metres
     //
-    // *needs to account for balloon radius expansion*
-    // Ascent rate should be near-constant (or mentally average-able)
-    // when this is properly accounted for
-    //
-    return Math.sqrt(( lift / 1000 ) * GRAVITY / (.5 * .3 * physics.density(currAlt) * ((( radius * radius ) * Math.PI ) / 10000 )));
+      
+    var height = ((currAlt - launchAlt) / (burstAlt - launchAlt));
+    var radius = launchRadius + ((burstRadius - launchRadius) * height);
+    var ascended = Math.sqrt(( lift / 1000000 ) * GRAVITY / (.5 * .3 * physics.density(currAlt) * (( Math.PI * Math.pow(radius, 2) ) / 10000 )));
+        
+    return ascended;
 };
 
 
@@ -108,5 +117,8 @@ exports.descend = function( currAlt, weight, radius ) {
     //
     // Correct me :)
     //
-    return descent = Math.sqrt(( weight / 1000 ) * GRAVITY / (.5 * .75 * physics.density( currAlt ) * (( 2 * Math.PI * radius ^ 2 ))));
+    
+    var descended = Math.sqrt(( weight / 1000000 ) * GRAVITY / (.5 * .75 * physics.density(currAlt) * (( 2 * Math.PI * Math.pow(radius, 2) ) / 10000 )));
+        
+    return descended;
 };
