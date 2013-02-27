@@ -29,8 +29,6 @@ var db_pass = process.env.COUCHDB_PASS;
 ///////////////////////////
 exports.read = function( path, callback ) {
     if ( path.substr(-1) === "/" ) {
-        // CASE: URL is a listing OR view... what shall we do
-
         path += "_all_docs?include_docs=true&ascending=true";
     }
 
@@ -48,9 +46,17 @@ exports.read = function( path, callback ) {
         });
 
         response.on("end", function() {
-            var results = JSON.parse( buffer );
+            var results;
 
-            callback( results );
+            try {
+                results = JSON.parse( buffer );
+            } catch ( error ) { }
+
+            if ( typeof callback !== "undefined" && typeof results !== "undefined" ) {
+                callback( results );
+            } else {
+                callback( false, true );
+            }
         });
     }).on("error", function() {
         callback( false, true );
@@ -87,9 +93,6 @@ exports.write = function( path, data, callback ) {
             });
 
             response.on("end", function() {
-                ////////////////////////////////////////////////
-                // TRY/CATCH Because Rate Limiting (I think?) //
-                ////////////////////////////////////////////////
                 var results;
 
                 try {
