@@ -87,6 +87,9 @@ exports.write = function( path, data, callback ) {
             });
 
             response.on("end", function() {
+                ////////////////////////////////////////////////
+                // TRY/CATCH Because Rate Limiting (I think?) //
+                ////////////////////////////////////////////////
                 var results;
 
                 try {
