@@ -7,6 +7,8 @@
  * Garbage Collection based on process.nextTick(), but if possible,
  * we want to catch stack overflows and and see what happened.
  *
+ * In the future, delete database.write error handlers
+ *
  */
 
 var async	 = require('async');
@@ -77,7 +79,7 @@ var daemon = function() {
 					////////////////////
 					// INITIALIZATION //
 					////////////////////
-					var thisID = queue[i].id;
+					var thisID = queue[i].parameters.options.id || queue[i].id;
 					var thisRev = queue[i].value.rev;
 					var thisFlight = queue[i].parameters;
 					var now = new Date();
@@ -87,11 +89,18 @@ var daemon = function() {
 					/////////////////////
 					// OPTIONS PARSING //
 					/////////////////////
-					if ( typeof thisFlight.options.overrideClimb !== "undefined" && thisFlight.options.overrideClimb ) { 
+					if ( typeof thisFlight.options.overrideClimb !== "undefined" && thisFlight.options.overrideClimb ) {
 						// This isn't an option that would be forwarded from the queue. Consider removing/Depricate
 						overrideClimb = true;
 					} else {
 						overrideClimb = false;
+					}
+
+					if ( typeof thisFlight.flags.spot !== "undefined" && thisFlight.flags.spot ) {
+						// This isn't an option that would be forwarded from the queue. Consider removing/Depricate
+						useSpot = thisFlight.flags.spot;
+					} else {
+						useSpot = false;
 					}
 
 
@@ -100,7 +109,7 @@ var daemon = function() {
 					/////////////////////////////////
 					var flight = {
 						flags: {
-							spot: false,
+							spot: useSpot,
 							active: true,
 							lastActivity: false
 						}, meta: {
@@ -135,85 +144,110 @@ var daemon = function() {
 					/////////////////////////////////
 					// Set our ACTIVE flag to TRUE //
 					/////////////////////////////////
-					var setActive = { _rev: thisRev, parameters: flight }; // revision data should be handled in the database, not here.
-
-					database.write('/fnstraj-queue/' + thisID, setActive, function( revision, error ) { // Do something about errors
+					database.write('/fnstraj-queue/' + thisID, { parameters: flight }, function( revision, error ) {
+						flight.flags.active = false;
 
 						if ( thisFlight.flags.spot ) {
-							
-							// 1 check spot for updates, write them down, notify if new points
-							// 2 get latest point, predict on top
-							// 3 write to db
-							// 4 set active flag off
-							// 5 turn off after 20 or so runs / 2hrs no update / landing detected
-							
-							
-							spot.getTracking( thisflight.flags.spot, function( tracking, error ) {
-								
+							//////////////////////////////////////////
+							// SPOT Tracking / Live Trajectory Mode //
+							//////////////////////////////////////////
+
+							console.log("Livetrack: Spot " + thisFlight.flags.spot);
+
+							spot.getTracking( thisFlight.flags.spot, function( tracking, error ) {
+
 								if ( typeof error !== "undefined" && error ) {
 									//////////////////////////////////
 									// CASE: POINTS UNAVAILABLE/DIE //
 									//////////////////////////////////
-									
-									// not closing active flag here, RED FLAG
-									
-									advance();
+									database.write('/fnstraj-queue/' + thisID, { parameters: flight }, function( revision, error ) {
+										advance();
+									});
 								} else {
 									////////////////////////////////////////
 									// CASE: TRACKING DATA EXISTS/FORWARD //
 									////////////////////////////////////////
 									database.read('/fnstraj-flights/' + thisID, function( spotBase, error ) {
 										if ( typeof error !== "undefined" && error ) {
-											
+											sleep();
 										} else {
-										
-											// decide if flight exists, if yes, work from last point,
-											// if not, launch from base.
-											
-											// below code assumes flight exists
-											
-											// if noflight
-											
-											
-											var repredict = spot.processTracking( tracking, spotBase );
-											
-											if ( repredict ) {
-												//////////////////////////////////////////
-												// CASE: REPREDICT FROM LAST SPOT POINT //
-												//////////////////////////////////////////	
-												if ( spot.determineOverride( tracking, spotBase ) ) {
-													
-												}
-												
-												spotBase.parameters.launch.latitude  = spotBase.flightpath[repredict].latitude;
-												spotBase.parameters.launch.longitude = spotBase.flightpath[repredict].longitude;
-												spotBase.parameters.launch.altitude  = spotbase.projection[repredict].altitude;
-												spotBase.parameters.launch.timestamp += repredict * 60000; 
-												
-												fnstraj.predict( spotBase, tracking, function( error ) {
-													
-													if ( typeof error !== "undefined" && error ) {
-														
-													} else {
-														
-														// We need to keep the queue item above for here, since we're just resetting the 
-														// flag and setting it back to idle
-														
-													}
-														
+											if ( spotBase.error ) {
+												///////////////////////////////////////////
+												// Run First Prediction of SPOT Tracking //
+												///////////////////////////////////////////
+												fnstraj.predict( flight, false, function( predictorError ) {
+													database.write('/fnstraj-queue/' + thisID, { parameters: flight }, function( revision, error ) {
+														if ( typeof predictorError !== "undefined" && predictorError ) {
+															/////////////////////////////////////
+															// CASE: PREDICTION FAILED/FORWARD //
+															/////////////////////////////////////
+
+
+														} else {
+															////////////////////////////
+															// CASE: COMPLETE/FORWARD //
+															////////////////////////////
+
+														}
+
+														advance();
+													});
 												});
+
+											} else {
+												///////////////////////////////////////
+												// Run From Last SPOT Tracking Point //
+												///////////////////////////////////////
+
+												var repredict = spot.processTracking( tracking, spotBase );
+
+												if ( repredict ) {
+													//////////////////////////////////////////
+													// CASE: REPREDICT FROM LAST SPOT POINT //
+													//////////////////////////////////////////
+													if ( spot.determineOverride( tracking, spotBase ) ) {
+														spotBase.parameters.options.overrideClimb = true;
+													}
+
+													spotBase.parameters.launch.latitude  = spotBase.flightpath[repredict].latitude;
+													spotBase.parameters.launch.longitude = spotBase.flightpath[repredict].longitude;
+													spotBase.parameters.launch.altitude  = spotbase.projection[repredict].altitude;
+													spotBase.parameters.launch.timestamp += repredict * 60000;
+
+													fnstraj.predict( spotBase, tracking, function( error ) {
+
+														if ( typeof error !== "undefined" && error ) {
+
+														} else {
+
+															// We need to keep the queue item above for here, since we're just resetting the
+															// flag and setting it back to idle
+
+														}
+
+													});
+												} else {
+													//////////////////////////////////
+													// CASE: NO NEW TRACKING POINTS //
+													//////////////////////////////////
+													database.write('/fnstraj-queue/' + thisID, { parameters: flight }, function( revision, error ) {
+														sleep();
+													});
+												}
 											}
-											
 										}
 									});
 								}
 							});
-							
+
 						} else {
 							//////////////////////////////////////////
 							// RUN PREDICTOR BASED ON FLIGHT OBJECT //
 							//////////////////////////////////////////
 							fnstraj.predict( flight, false, function( error ) {
+								//
+								// Use only one database.remove, handle errors beforehand
+								//
 
 								if ( typeof error !== "undefined" && error ) {
 									/////////////////////////////////////

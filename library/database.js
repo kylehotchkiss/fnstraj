@@ -63,15 +63,12 @@ exports.read = function( path, callback ) {
 // DATABASE WRITE REQUEST //
 ////////////////////////////
 exports.write = function( path, data, callback ) {
-    // Critical: Can't support amends!
     exports.read( path, function( results ) {
         if ( !results.error ) {
-            // Data is being rewriten - how do we change the URL?
-
-            if ( data._rev === results._rev ) {
-                // CASE: Revisions match
-
-            }
+            ////////////////////////////////
+            // CASE: DATA EXISTS, REWRITE //
+            ////////////////////////////////
+            data._rev = results._rev;
         }
 
         var buffer = "";
@@ -90,10 +87,16 @@ exports.write = function( path, data, callback ) {
             });
 
             response.on("end", function() {
-                var results = JSON.parse( buffer );
+                var results;
 
-                if ( typeof callback !== "undefined") {
+                try {
+                    results = JSON.parse( buffer );
+                } catch ( error ) { }
+
+                if ( typeof callback !== "undefined" && typeof results.rev !== "undefined" ) {
                     callback( results.rev );
+                } else {
+                    callback( false, true );
                 }
             });
         }).on("error", function() {
