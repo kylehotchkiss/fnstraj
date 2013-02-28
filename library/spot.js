@@ -112,22 +112,31 @@ exports.processTracking = function( tracking, flight ) {
     // Return index to base predictions off of for latest tracking point,
     // return false if no need repredict
     //
-    var exists, offset;
+    var exists, offset, difference;
     var pointsAdded = 0;
-    var baseTime = flight.parameters.launch.timestamp;
+    var greatestDifference = 0;
+    var baseTime = flight.parameters.launch.timestamp / 1000;
+    baseTime = baseTime.toFixed(0);
 
+    if ( typeof flight.flightpath === "undefined" ) {
+        flight.flightpath = {};
+    }
 
     for ( var newPoint in tracking ) {
         ///////////////////////////////////////
         // CHECK IF POINT EXISTS, ADD IF NEW //
         ///////////////////////////////////////
-        if (( newPoint.unixTime - baseTime ) <= 18000 ) {
+        difference = Math.round(( tracking[newPoint].unixTime - baseTime ) / 60);
+
+        console.log(difference);
+
+        if ( difference > 0 && difference <= flight.prediction.length ) { // Compare within flight bounds/not 5hrs
             // check that we only go back ~ 5hrs tops
 
             exists = false;
 
             for ( var oldPoint in flight.flightpath ) {
-                if ( newPoint.id === oldPoint.id ) {
+                if ( tracking[newPoint].id === flight.flightpath[oldPoint].id ) {
                     exists = true;
 
                     break;
@@ -135,23 +144,23 @@ exports.processTracking = function( tracking, flight ) {
             }
 
             if ( !exists ) {
+                flight.flightpath[difference] = tracking[newPoint];
 
-                // add point to offset from base timestamp
-
-                offset = Math.round((newpoint.unixTime - baseTime) / 60);
-
-                flight.flightpath[offset] = newPoint;
+                if ( difference > greatestDifference ) {
+                    greatestDifference = difference;
+                }
 
                 pointsAdded++;
+
+                continue;
             }
         }
     }
 
-    //console.log(pointsAdded + " points were added to the database.");
+    console.log(pointsAdded + " points were added to the database.");
 
-    if ( offset ) {
-        // Not returning the largest offset, which is what we are interested in
-        return offset;
+    if ( greatestDifference > 0 ) {
+        return greatestDifference;
     } else {
         return false;
     }

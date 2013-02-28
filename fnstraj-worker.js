@@ -201,30 +201,41 @@ var daemon = function() {
 
 												var repredict = spot.processTracking( tracking, spotBase );
 
+												console.log(repredict);
+
 												if ( repredict ) {
 													//////////////////////////////////////////
 													// CASE: REPREDICT FROM LAST SPOT POINT //
 													//////////////////////////////////////////
 													if ( spot.determineOverride( tracking, spotBase ) ) {
 														spotBase.parameters.options.overrideClimb = true;
+
+														console.log("OVERRIDE CLIMB");
 													}
+
 
 													spotBase.parameters.launch.latitude  = spotBase.flightpath[repredict].latitude;
 													spotBase.parameters.launch.longitude = spotBase.flightpath[repredict].longitude;
-													spotBase.parameters.launch.altitude  = spotbase.projection[repredict].altitude;
+													spotBase.parameters.launch.altitude  = spotBase.prediction[repredict].altitude;
 													spotBase.parameters.launch.timestamp += repredict * 60000;
 
-													fnstraj.predict( spotBase, tracking, function( error ) {
+													fnstraj.predict( spotBase.parameters, tracking, function( predictorError ) {
+														database.write('/fnstraj-queue/' + thisID, { parameters: flight }, function( revision, error ) {
+															if ( typeof predictorError !== "undefined" && predictorError ) {
+																/////////////////////////////////////
+																// CASE: PREDICTION FAILED/FORWARD //
+																/////////////////////////////////////
 
-														if ( typeof error !== "undefined" && error ) {
 
-														} else {
+															} else {
+																////////////////////////////
+																// CASE: COMPLETE/FORWARD //
+																////////////////////////////
 
-															// We need to keep the queue item above for here, since we're just resetting the
-															// flag and setting it back to idle
+															}
 
-														}
-
+															advance();
+														});
 													});
 												} else {
 													//////////////////////////////////

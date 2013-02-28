@@ -99,8 +99,12 @@ exports.write = function( path, data, callback ) {
                     results = JSON.parse( buffer );
                 } catch ( error ) { }
 
-                if ( typeof callback !== "undefined" && typeof results.rev !== "undefined" ) {
-                    callback( results.rev );
+                if ( typeof callback !== "undefined" && typeof results === "object" ) {
+                    if ( typeof results.rev !== "undefined" ) {
+                        callback( results.rev );
+                    } else {
+                        callback( false, true );
+                    }
                 } else {
                     callback( false, true );
                 }
