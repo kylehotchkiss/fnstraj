@@ -201,7 +201,7 @@ var daemon = function() {
 
 												var repredict = spot.processTracking( tracking, spotBase );
 
-												console.log(repredict);
+												// if predict > flight.prediction.length, delete queue item
 
 												if ( repredict ) {
 													//////////////////////////////////////////
@@ -219,7 +219,9 @@ var daemon = function() {
 													spotBase.parameters.launch.altitude  = spotBase.prediction[repredict].altitude;
 													spotBase.parameters.launch.timestamp += repredict * 60000;
 
-													fnstraj.predict( spotBase.parameters, tracking, function( predictorError ) {
+
+
+													fnstraj.predict( spotBase.parameters, spotBase.flightpath, function( predictorError ) {
 														database.write('/fnstraj-queue/' + thisID, { parameters: flight }, function( revision, error ) {
 															if ( typeof predictorError !== "undefined" && predictorError ) {
 																/////////////////////////////////////

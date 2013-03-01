@@ -119,7 +119,7 @@ exports.processTracking = function( tracking, flight ) {
     baseTime = baseTime.toFixed(0);
 
     if ( typeof flight.flightpath === "undefined" ) {
-        flight.flightpath = {};
+        flight.flightpath = [];
     }
 
     for ( var newPoint in tracking ) {
@@ -128,18 +128,19 @@ exports.processTracking = function( tracking, flight ) {
         ///////////////////////////////////////
         difference = Math.round(( tracking[newPoint].unixTime - baseTime ) / 60);
 
-        console.log(difference);
-
         if ( difference > 0 && difference <= flight.prediction.length ) { // Compare within flight bounds/not 5hrs
-            // check that we only go back ~ 5hrs tops
-
             exists = false;
 
             for ( var oldPoint in flight.flightpath ) {
-                if ( tracking[newPoint].id === flight.flightpath[oldPoint].id ) {
-                    exists = true;
+                if ( typeof oldPoint === "object" ) {
+                    if ( tracking[newPoint].id === flight.flightpath[oldPoint].id ) {
 
-                    break;
+                        console.log("DO NOT WRITE");
+
+                        exists = true;
+
+                        break;
+                    }
                 }
             }
 
@@ -168,5 +169,9 @@ exports.processTracking = function( tracking, flight ) {
 
 
 exports.determineOverride = function( tracking, flight ) {
-
+    if ( tracking.length > flight.parameters.points.burst.index ) {
+        return true;
+    } else {
+        return false;
+    }
 }
