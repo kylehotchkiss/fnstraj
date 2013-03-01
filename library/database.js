@@ -124,6 +124,9 @@ exports.write = function( path, data, callback ) {
 // DATABASE DELETE REQUEST //
 /////////////////////////////
 exports.remove = function( path, rev, callback ) {
+    //
+    // Like the Write one above, lets get rev so we can delete
+    //
     var couchdb = http.request({
         auth: db_user + ":" + db_pass,
         host: db_host,

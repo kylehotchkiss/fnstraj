@@ -145,6 +145,8 @@ exports.processTracking = function( tracking, flight ) {
             }
 
             if ( !exists ) {
+                console.log("Offset: " + difference);
+
                 flight.flightpath[difference] = tracking[newPoint];
 
                 if ( difference > greatestDifference ) {
@@ -157,8 +159,6 @@ exports.processTracking = function( tracking, flight ) {
             }
         }
     }
-
-    console.log(pointsAdded + " points were added to the database.");
 
     if ( greatestDifference > 0 ) {
         return greatestDifference;

@@ -10,6 +10,7 @@
  * program control here. Flow also flies around async.whilst a bit, which is
  * explained well enough below.
  *
+ * TODO: Check for proper flight object here, because weird crashes if it doesn't.
  *
  */
 var async    = require('async');
