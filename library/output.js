@@ -119,10 +119,13 @@ var writeJSON = function( flight, table, callback ) {
 ///////////////////////////////
 var writeDatabase = function ( flight, table, tracking, analysis, callback ) {
 	//
-	// In the future, this will have to manually append for
-	// multiple prediction support.
+	// How do we know how to append data? 
+	// We may need to grab this first and see the prediction count
+	// then we have to append to that. We don't have offset tracking, 
+	// which would help
 	//
 	var flightID = flight.options.flightID;
+	
 	var content  = { parameters: flight, analysis: analysis, prediction: table };
 	
 	if ( tracking ) {

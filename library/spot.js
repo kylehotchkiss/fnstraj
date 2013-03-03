@@ -132,8 +132,16 @@ exports.processTracking = function( tracking, flight ) {
             exists = false;
 
             for ( var oldPoint in flight.flightpath ) {
+
+
+
                 if ( typeof oldPoint === "object" ) {
+
+                    console.log("Compare: " + tracking[newPoint].id + ", " + flight.flightpath[oldPoint].id);
+                    
                     if ( tracking[newPoint].id === flight.flightpath[oldPoint].id ) {
+
+
 
                         console.log("DO NOT WRITE");
 

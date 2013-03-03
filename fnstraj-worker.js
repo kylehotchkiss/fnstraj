@@ -7,9 +7,9 @@
  * Garbage Collection based on process.nextTick(), but if possible,
  * we want to catch stack overflows and and see what happened.
  *
- * In the future, 
+ * In the future,
  *  - delete database.write error handlers
- *  - Do things more async if possible 
+ *  - Do things more async if possible
  *    (don't need to wait on DB for certain ops)
  *  - Remove all revision tracking
  *  - Move all console.logs for Worker purposes to here
@@ -157,15 +157,15 @@ var daemon = function() {
 							// SPOT Tracking / Live Trajectory Mode //
 							//////////////////////////////////////////
 							console.log("Livetrack: Spot " + thisFlight.flags.spot);
-
+							
 							spot.getTracking( thisFlight.flags.spot, function( tracking, error ) {
 								if ( typeof error !== "undefined" && error ) {
 									//////////////////////////////////////
 									// CASE: POINTS UNAVAILABLE/FORWARD //
 									//////////////////////////////////////
-									database.write('/fnstraj-queue/' + thisID, { parameters: flight }, function( revision, error ) {
-										advance();
-									});
+									database.remove('/fnstraj-queue/' + thisID, revision);
+									
+									advance();
 								} else {
 									////////////////////////////////////////
 									// CASE: TRACKING DATA EXISTS/FORWARD //
@@ -176,7 +176,7 @@ var daemon = function() {
 											// CASE: DATABASE DOWN/SLEEP //
 											///////////////////////////////
 											sleep();
-										} else {
+										} else {											
 											if ( spotBase.error ) {
 												///////////////////////////////////////////
 												// Run First Prediction of SPOT Tracking //
@@ -206,18 +206,15 @@ var daemon = function() {
 												///////////////////////////////////////
 
 												var repredict = spot.processTracking( tracking, spotBase );
-												if ( repredict > spotBase.prediction.length ) {
-													//////////////////////////////////////////
-													// CASE: SPOT TRACKING FINISHED/FORWARD //
-													//////////////////////////////////////////
-													database.remove('/fnstraj-queue/' + thisID, revision);
-													
-													advance();
-												} else {
+
+												if ( true ) {
 													if ( repredict ) {
 														//////////////////////////////////////////
 														// CASE: REPREDICT FROM LAST SPOT POINT //
 														//////////////////////////////////////////
+														spotBase.parameters.options.launchOffset = repredict;
+														spotBase.parameters.launch.timestamp
+
 														if ( spot.determineOverride( tracking, spotBase ) ) {
 															spotBase.parameters.options.overrideClimb = true;
 														}
@@ -226,8 +223,7 @@ var daemon = function() {
 														spotBase.parameters.launch.latitude  = spotBase.flightpath[repredict].latitude;
 														spotBase.parameters.launch.longitude = spotBase.flightpath[repredict].longitude;
 														spotBase.parameters.launch.altitude  = spotBase.prediction[repredict].altitude;
-														spotBase.parameters.launch.timestamp += repredict * 60000;
-
+		
 
 														fnstraj.predict( spotBase.parameters, spotBase.flightpath, function( predictorError ) {
 															database.write('/fnstraj-queue/' + thisID, { parameters: flight }, function( revision, error ) {
@@ -237,7 +233,7 @@ var daemon = function() {
 																	/////////////////////////////
 																	if ( thisFlight.meta.email !== "" ) {
 																		emailContent = "Hey There,\n\nWe are sad to inform you that your trajectory request did not successfully compile. fnstraj is very new software, and we still have some kinks to work out. We are unable to re-queue your flight at this time, but feel free to try again, with a different model.\n\nThanks for experimenting with us,\n- fnstraj";
-																	
+
 																		helpers.sendMail( thisFlight.meta.email, "fnstraj failed: flight #" + thisID, emailContent);
 																	}
 																} else {
@@ -246,7 +242,7 @@ var daemon = function() {
 																	/////////////////////////////////
 																	if ( thisFlight.meta.email !== "" ) {
 																		emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj";
-																	
+
 																		helpers.sendMail( thisFlight.meta.email, "fnstraj prediction: flight #" + thisID, emailContent );
 																	}
 																}
@@ -280,7 +276,7 @@ var daemon = function() {
 									/////////////////////////////
 									if ( thisFlight.meta.email !== "" ) {
 										emailContent = "Hey There,\n\nWe are sad to inform you that your trajectory request did not successfully compile. fnstraj is very new software, and we still have some kinks to work out. We are unable to re-queue your flight at this time, but feel free to try again, with a different model.\n\nThanks for experimenting with us,\n- fnstraj";
-									
+
 										helpers.sendMail( thisFlight.meta.email, "fnstraj failed: flight #" + thisID, emailContent);
 									}
 								} else {
@@ -289,13 +285,13 @@ var daemon = function() {
 									/////////////////////////////////
 									if ( thisFlight.meta.email !== "" ) {
 										emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj";
-									
+
 										helpers.sendMail( thisFlight.meta.email, "fnstraj prediction: flight #" + thisID, emailContent );
 									}
 								}
-								
+
 								database.remove('/fnstraj-queue/' + thisID, revision);
-								
+
 								advance();
 							});
 						}
@@ -359,7 +355,7 @@ var sleep = function() {
 			console.log("FNSTRAJ_SLEEP was undefined, defaulting to 3 seconds.");
 		}
 
-		if ( typeof process.argv[2] === "string" && !isNaN(parseInt(process.argv[2])) ) {
+		if ( typeof process.argv[2] === "string" && !isNaN(parseInt(process.argv[2], 10)) ) {
 			//////////////////////////////////////////////////////
 			// CASE: OFFSET FOUND IN ARGUMENTS, RUN WITH OFFSET //
 			//////////////////////////////////////////////////////
