@@ -11,7 +11,6 @@
  *  - delete database.write error handlers
  *  - Do things more async if possible
  *    (don't need to wait on DB for certain ops)
- *  - Remove all revision tracking
  *  - Move all console.logs for Worker purposes to here
  *
  */
@@ -84,9 +83,8 @@ var daemon = function() {
 					////////////////////
 					// INITIALIZATION //
 					////////////////////
-					var thisID = queue[i].parameters.options.id || queue[i].id;
-					var thisRev = queue[i].value.rev;
-					var thisFlight = queue[i].parameters;
+					var queuedID = queue[i].parameters.options.id || queue[i].id;
+					var queuedFlight = queue[i];
 					var now = new Date();
 					var timestamp = now.getTime();
 
@@ -94,16 +92,9 @@ var daemon = function() {
 					/////////////////////
 					// OPTIONS PARSING //
 					/////////////////////
-					if ( typeof thisFlight.options.overrideClimb !== "undefined" && thisFlight.options.overrideClimb ) {
+					if ( typeof queuedFlight.parameters.flags.spot !== "undefined" && queuedFlight.parameters.flags.spot ) {
 						// This isn't an option that would be forwarded from the queue. Consider removing/Depricate
-						overrideClimb = true;
-					} else {
-						overrideClimb = false;
-					}
-
-					if ( typeof thisFlight.flags.spot !== "undefined" && thisFlight.flags.spot ) {
-						// This isn't an option that would be forwarded from the queue. Consider removing/Depricate
-						useSpot = thisFlight.flags.spot;
+						useSpot = queuedFlight.parameters.flags.spot;
 					} else {
 						useSpot = false;
 					}
@@ -115,33 +106,34 @@ var daemon = function() {
 					var flight = {
 						flags: {
 							spot: useSpot,
-							active: true,
+							//active: true,
+							active: false,
 							lastActivity: false
 						}, meta: {
-							name: thisFlight.meta.name,
-							email: thisFlight.meta.email,
-							program: thisFlight.meta.program
+							name: queuedFlight.parameters.meta.name,
+							email: queuedFlight.parameters.meta.email,
+							program: queuedFlight.parameters.meta.program
 						}, options: {
-							model: thisFlight.options.model,
+							model: queuedFlight.parameters.options.model,
 							context: "daemon",
-							flightID: thisID,
+							flightID: queuedID,
 
 							// Optional
 							resolution: 1,
 							overrideClimb: overrideClimb
 						}, launch: {
-							altitude: parseFloat(thisFlight.launch.altitude),
-							latitude: parseFloat(thisFlight.launch.latitude),
-							longitude: parseFloat(thisFlight.launch.longitude),
+							altitude: parseFloat(queuedFlight.parameters.launch.altitude),
+							latitude: parseFloat(queuedFlight.parameters.launch.latitude),
+							longitude: parseFloat(queuedFlight.parameters.launch.longitude),
 							timestamp: timestamp
 						}, balloon: {
-							lift: parseFloat(thisFlight.balloon.lift),
-							burst: parseFloat(thisFlight.balloon.burst),
-							burstRadius: parseFloat(thisFlight.balloon.burstRadius),
-							launchRadius: parseFloat(thisFlight.balloon.launchRadius)
+							lift: parseFloat(queuedFlight.parameters.balloon.lift),
+							burst: parseFloat(queuedFlight.parameters.balloon.burst),
+							burstRadius: parseFloat(queuedFlight.parameters.balloon.burstRadius),
+							launchRadius: parseFloat(queuedFlight.parameters.balloon.launchRadius)
 						}, payload: {
-							weight:	parseFloat(thisFlight.payload.weight),
-							chuteRadius: parseFloat(thisFlight.payload.chuteRadius),
+							weight:	parseFloat(queuedFlight.parameters.payload.weight),
+							chuteRadius: parseFloat(queuedFlight.parameters.payload.chuteRadius),
 						}
 					};
 
@@ -149,40 +141,40 @@ var daemon = function() {
 					/////////////////////////////////
 					// Set our ACTIVE flag to TRUE //
 					/////////////////////////////////
-					database.write('/fnstraj-queue/' + thisID, { parameters: flight }, function( revision, error ) {
+					database.write('/fnstraj-queue/' + queuedID, { parameters: flight }, function( error ) {
 						flight.flags.active = false;
 
-						if ( thisFlight.flags.spot ) {
+						if ( queuedFlight.parameters.flags.spot ) {
 							//////////////////////////////////////////
 							// SPOT Tracking / Live Trajectory Mode //
 							//////////////////////////////////////////
-							console.log("Livetrack: Spot " + thisFlight.flags.spot);
-							
-							spot.getTracking( thisFlight.flags.spot, function( tracking, error ) {
+							console.log("Livetrack: Spot " + queuedFlight.parameters.flags.spot);
+
+							spot.getTracking( queuedFlight.parameters.flags.spot, function( tracking, error ) {
 								if ( typeof error !== "undefined" && error ) {
 									//////////////////////////////////////
 									// CASE: POINTS UNAVAILABLE/FORWARD //
 									//////////////////////////////////////
-									database.remove('/fnstraj-queue/' + thisID, revision);
-									
+									database.remove('/fnstraj-queue/' + queuedID);
+
 									advance();
 								} else {
 									////////////////////////////////////////
 									// CASE: TRACKING DATA EXISTS/FORWARD //
 									////////////////////////////////////////
-									database.read('/fnstraj-flights/' + thisID, function( spotBase, error ) {
+									database.read('/fnstraj-flights/' + queuedID, function( spotBase, error ) {
 										if ( typeof error !== "undefined" && error ) {
 											///////////////////////////////
 											// CASE: DATABASE DOWN/SLEEP //
 											///////////////////////////////
 											sleep();
-										} else {											
+										} else {
 											if ( spotBase.error ) {
 												///////////////////////////////////////////
 												// Run First Prediction of SPOT Tracking //
 												///////////////////////////////////////////
 												fnstraj.predict( flight, false, function( predictorError ) {
-													database.write('/fnstraj-queue/' + thisID, { parameters: flight }, function( revision, error ) {
+													database.write('/fnstraj-queue/' + queuedID, { parameters: flight }, function( error ) {
 														if ( typeof predictorError !== "undefined" && predictorError ) {
 															/////////////////////////////////////
 															// CASE: PREDICTION FAILED/FORWARD //
@@ -204,16 +196,15 @@ var daemon = function() {
 												///////////////////////////////////////
 												// Run From Last SPOT Tracking Point //
 												///////////////////////////////////////
-
 												var repredict = spot.processTracking( tracking, spotBase );
 
-												if ( true ) {
+												if ( flight.launch.timestamp + " " + ( spotBase.parameters.launch.timestamp + ( spotBase.prediction[0].length * 1000 * 60 )) ) {
 													if ( repredict ) {
 														//////////////////////////////////////////
 														// CASE: REPREDICT FROM LAST SPOT POINT //
 														//////////////////////////////////////////
 														spotBase.parameters.options.launchOffset = repredict;
-														spotBase.parameters.launch.timestamp
+														//spotBase.parameters.launch.timestamp
 
 														if ( spot.determineOverride( tracking, spotBase ) ) {
 															spotBase.parameters.options.overrideClimb = true;
@@ -222,28 +213,28 @@ var daemon = function() {
 
 														spotBase.parameters.launch.latitude  = spotBase.flightpath[repredict].latitude;
 														spotBase.parameters.launch.longitude = spotBase.flightpath[repredict].longitude;
-														spotBase.parameters.launch.altitude  = spotBase.prediction[repredict].altitude;
-		
+														spotBase.parameters.launch.altitude  = spotBase.prediction[0][repredict].altitude;
+
 
 														fnstraj.predict( spotBase.parameters, spotBase.flightpath, function( predictorError ) {
-															database.write('/fnstraj-queue/' + thisID, { parameters: flight }, function( revision, error ) {
+															database.write('/fnstraj-queue/' + queuedID, { parameters: flight }, function( error ) {
 																if ( typeof predictorError !== "undefined" && predictorError ) {
 																	/////////////////////////////
 																	// Prediction Failed Email //
 																	/////////////////////////////
-																	if ( thisFlight.meta.email !== "" ) {
+																	if ( queuedFlight.parameters.meta.email !== "" ) {
 																		emailContent = "Hey There,\n\nWe are sad to inform you that your trajectory request did not successfully compile. fnstraj is very new software, and we still have some kinks to work out. We are unable to re-queue your flight at this time, but feel free to try again, with a different model.\n\nThanks for experimenting with us,\n- fnstraj";
 
-																		helpers.sendMail( thisFlight.meta.email, "fnstraj failed: flight #" + thisID, emailContent);
+																		helpers.sendMail( queuedFlight.parameters.meta.email, "fnstraj failed: flight #" + queuedID, emailContent);
 																	}
 																} else {
 																	/////////////////////////////////
 																	// Prediction Completion Email //
 																	/////////////////////////////////
-																	if ( thisFlight.meta.email !== "" ) {
-																		emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj";
+																	if ( queuedFlight.parameters.meta.email !== "" ) {
+																		emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + queuedID + "\n\nThanks for experimenting with us,\n-fnstraj";
 
-																		helpers.sendMail( thisFlight.meta.email, "fnstraj prediction: flight #" + thisID, emailContent );
+																		helpers.sendMail( queuedFlight.parameters.meta.email, "fnstraj prediction: flight #" + queuedID, emailContent );
 																	}
 																}
 
@@ -254,10 +245,16 @@ var daemon = function() {
 														////////////////////////////////////////
 														// CASE: NO NEW TRACKING POINTS/SLEEP //
 														////////////////////////////////////////
-														database.write('/fnstraj-queue/' + thisID, { parameters: flight }, function( revision, error ) {
+														database.write('/fnstraj-queue/' + queuedID, { parameters: flight }, function( error ) {
 															sleep();
 														});
 													}
+												} else {
+													console.log("Spot Livetrack Done");
+
+													database.remove('/fnstraj-queue/' + queuedID);
+
+													advance();
 												}
 											}
 										}
@@ -274,23 +271,23 @@ var daemon = function() {
 									/////////////////////////////
 									// Prediction Failed Email //
 									/////////////////////////////
-									if ( thisFlight.meta.email !== "" ) {
+									if ( queuedFlight.parameters.meta.email !== "" ) {
 										emailContent = "Hey There,\n\nWe are sad to inform you that your trajectory request did not successfully compile. fnstraj is very new software, and we still have some kinks to work out. We are unable to re-queue your flight at this time, but feel free to try again, with a different model.\n\nThanks for experimenting with us,\n- fnstraj";
 
-										helpers.sendMail( thisFlight.meta.email, "fnstraj failed: flight #" + thisID, emailContent);
+										helpers.sendMail( queuedFlight.parameters.meta.email, "fnstraj failed: flight #" + queuedID, emailContent);
 									}
 								} else {
 									/////////////////////////////////
 									// Prediction Completion Email //
 									/////////////////////////////////
-									if ( thisFlight.meta.email !== "" ) {
-										emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + thisID + "\n\nThanks for experimenting with us,\n-fnstraj";
+									if ( queuedFlight.parameters.meta.email !== "" ) {
+										emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + queuedID + "\n\nThanks for experimenting with us,\n-fnstraj";
 
-										helpers.sendMail( thisFlight.meta.email, "fnstraj prediction: flight #" + thisID, emailContent );
+										helpers.sendMail( queuedFlight.parameters.meta.email, "fnstraj prediction: flight #" + queuedID, emailContent );
 									}
 								}
 
-								database.remove('/fnstraj-queue/' + thisID, revision);
+								database.remove('/fnstraj-queue/' + queuedID);
 
 								advance();
 							});

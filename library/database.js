@@ -13,7 +13,6 @@ var url = require("url");
 var http = require("http");
 
 
-
 //////////////////////////////////
 // GRAB ENVIRONMENTAL VARIABLES //
 //////////////////////////////////
@@ -21,7 +20,6 @@ var db_host = process.env.COUCHDB_HOST;
 var db_port = process.env.COUCHDB_PORT;
 var db_user = process.env.COUCHDB_USER;
 var db_pass = process.env.COUCHDB_PASS;
-
 
 
 ///////////////////////////
@@ -64,7 +62,6 @@ exports.read = function( path, callback ) {
 };
 
 
-
 ////////////////////////////
 // DATABASE WRITE REQUEST //
 ////////////////////////////
@@ -101,16 +98,16 @@ exports.write = function( path, data, callback ) {
 
                 if ( typeof callback !== "undefined" && typeof results === "object" ) {
                     if ( typeof results.rev !== "undefined" ) {
-                        callback( results.rev );
+                        callback();
                     } else {
-                        callback( false, true );
+                        callback( true );
                     }
                 } else {
-                    callback( false, true );
+                    callback( true );
                 }
             });
         }).on("error", function() {
-              callback( false, true );
+              callback( true );
         });
 
         couchdb.write( JSON.stringify(data) );
@@ -119,30 +116,36 @@ exports.write = function( path, data, callback ) {
 };
 
 
-
 /////////////////////////////
 // DATABASE DELETE REQUEST //
 /////////////////////////////
-exports.remove = function( path, rev, callback ) {
-    //
-    // Like the Write one above, lets get rev so we can delete
-    //
-    var couchdb = http.request({
-        auth: db_user + ":" + db_pass,
-        host: db_host,
-        path: path,
-        port: db_port,
-        headers: { "If-Match": rev },
-        method: "DELETE"
-    }, function() {
-        if ( typeof callback !== "undefined") {
-            callback();
-        }
-    }).on("error", function() {
-        if ( typeof callback !== "undefined" ) {
-            callback( false, true );
+exports.remove = function( path, callback ) {
+    exports.read( path, function( results, error ) {
+        if (( typeof error !== "undefined" && error ) || results.error ) {
+            if ( typeof callback !== "undefined" ) {
+                callback( false, true );
+            }
+        } else {
+            var revision = results._rev;
+
+            var couchdb = http.request({
+                auth: db_user + ":" + db_pass,
+                host: db_host,
+                path: path,
+                port: db_port,
+                headers: { "If-Match": revision },
+                method: "DELETE"
+            }, function() {
+                if ( typeof callback !== "undefined") {
+                    callback();
+                }
+            }).on("error", function() {
+                if ( typeof callback !== "undefined" ) {
+                    callback( false, true );
+                }
+            });
+
+            couchdb.end();
         }
     });
-
-    couchdb.end();
 };

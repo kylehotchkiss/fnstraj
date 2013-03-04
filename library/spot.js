@@ -112,8 +112,7 @@ exports.processTracking = function( tracking, flight ) {
     // Return index to base predictions off of for latest tracking point,
     // return false if no need repredict
     //
-    var exists, offset, difference;
-    var pointsAdded = 0;
+    var difference;
     var greatestDifference = 0;
     var baseTime = flight.parameters.launch.timestamp / 1000;
     baseTime = baseTime.toFixed(0);
@@ -128,31 +127,8 @@ exports.processTracking = function( tracking, flight ) {
         ///////////////////////////////////////
         difference = Math.round(( tracking[newPoint].unixTime - baseTime ) / 60);
 
-        if ( difference > 0 && difference <= flight.prediction.length ) { // Compare within flight bounds/not 5hrs
-            exists = false;
-
-            for ( var oldPoint in flight.flightpath ) {
-
-
-
-                if ( typeof oldPoint === "object" ) {
-
-                    console.log("Compare: " + tracking[newPoint].id + ", " + flight.flightpath[oldPoint].id);
-                    
-                    if ( tracking[newPoint].id === flight.flightpath[oldPoint].id ) {
-
-
-
-                        console.log("DO NOT WRITE");
-
-                        exists = true;
-
-                        break;
-                    }
-                }
-            }
-
-            if ( !exists ) {
+        if ( difference > 0 && difference <= flight.prediction[0].length ) {
+            if ( typeof flight.flightpath[difference] === "undefined" || flight.flightpath[difference] === null ) {
                 console.log("Offset: " + difference);
 
                 flight.flightpath[difference] = tracking[newPoint];
@@ -160,10 +136,6 @@ exports.processTracking = function( tracking, flight ) {
                 if ( difference > greatestDifference ) {
                     greatestDifference = difference;
                 }
-
-                pointsAdded++;
-
-                continue;
             }
         }
     }

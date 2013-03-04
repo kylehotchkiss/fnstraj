@@ -119,26 +119,51 @@ var writeJSON = function( flight, table, callback ) {
 ///////////////////////////////
 var writeDatabase = function ( flight, table, tracking, analysis, callback ) {
 	//
-	// How do we know how to append data? 
+	// How do we know how to append data?
 	// We may need to grab this first and see the prediction count
-	// then we have to append to that. We don't have offset tracking, 
+	// then we have to append to that. We don't have offset tracking,
 	// which would help
 	//
+	var predictionIndex, predictionTable;
 	var flightID = flight.options.flightID;
-	
-	var content  = { parameters: flight, analysis: analysis, prediction: table };
-	
-	if ( tracking ) {
-		content.flightpath = tracking;
-	}
 
-	database.write( "/fnstraj-flights/" + flightID, content, function( revision, error ) {
-		if ( typeof error !== "undefined" && error ) {
-			console.log("  databasefail: " + error.message);
-			callback( true );
+	database.read( "/fnstraj-flights/" + flightID, function( results, error ) {
+		if ( results.error ) {
+			//////////////////////////////////////////
+			// CASE: FLIGHT DOESN'T EXIST, INITIATE //
+			//////////////////////////////////////////
+
+			predictionIndex = 0;
+			predictionTable = [ table ];
 		} else {
-			callback();
+			////////////////////////////////////
+			// CASE: FLIGHT EXISTS, APPENDING //
+			////////////////////////////////////
+			predictionIndex = flight.options.launchOffset;
+
+			console.log( "Prediction Index" + predictionIndex )
+
+			predictionTable = results.prediction;
+			predictionTable[predictionIndex] = table;
 		}
+
+		var content  = { parameters: flight, analysis: analysis};
+
+		content.prediction = predictionTable;
+
+		if ( tracking ) {
+			content.flightpath = tracking;
+		}
+
+		database.write( "/fnstraj-flights/" + flightID, content, function( error ) {
+			if ( typeof error !== "undefined" && error ) {
+				console.log("  databasefail: " + error.message);
+				callback( true );
+			} else {
+				callback();
+			}
+		});
+
 	});
 }
 
@@ -149,7 +174,7 @@ var writeDatabase = function ( flight, table, tracking, analysis, callback ) {
 var writeStats = function ( flight, stats, callback ) {
 	var flightID = flight.options.flightID;
 
-	database.write( "/fnstraj-statistics/" + flightID, stats, function( revision, error ) {
+	database.write( "/fnstraj-statistics/" + flightID, stats, function( error ) {
 		if ( typeof error !== "undefined" && error ) {
 			// We don't care that much.
 			callback( true );
