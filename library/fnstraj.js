@@ -39,7 +39,6 @@ exports.predict = function( inputFlight, tracking, parentCallback ) {
     flight.flying = true;
 
 
-
     ////////////////////////
     // Options Processing //
     ////////////////////////
@@ -54,16 +53,14 @@ exports.predict = function( inputFlight, tracking, parentCallback ) {
     }
 
 
-
     //////////////////////////////////////////
     // Pretty-printed Console Notifications //
     //////////////////////////////////////////
     console.log("Predicting: flight #" + flight.options.flightID + " on NOAA " + flight.options.model);
-    
+
     if ( fnstraj_debug === "true" ) {
         console.log("URL root: http://nomads.ncep.noaa.gov:9090/dods/");
     }
-
 
 
     async.whilst(
@@ -71,7 +68,6 @@ exports.predict = function( inputFlight, tracking, parentCallback ) {
         // LOOP CONDITION //
         ////////////////////
         function() { return flight.flying; },
-
 
 
         //////////////////
@@ -128,14 +124,14 @@ exports.predict = function( inputFlight, tracking, parentCallback ) {
                         ///////////////////////
                         stats.endTime = new Date().getTime();
                         stats.predictorTime = (( stats.endTime - stats.startTime ) / 1000);
-                        
-                        
+
+
                         /////////////
                         // Cleanup //
                         /////////////
                         delete stats.endTime; delete stats.startTime;
                         delete flight.flying; delete flight.status;
-                        
+
                         // reset launch to table[0];
 
 
@@ -158,16 +154,16 @@ exports.predict = function( inputFlight, tracking, parentCallback ) {
                                 helpers.coordsToCity(table[table.length - 1].latitude, table[table.length - 1].longitude, callback);
                             }
                         ], function( error, results ) {
-                            
+
                             if ( results[0] ) {
-                                flight.points.launch = { name: results[0] };    
+                                flight.points.launch = { name: results[0] };
                             }
-                            
+
                             if ( results[1] ) {
                                 flight.points.landing = { name: results[1] };
                             }
-                        
-                        
+
+
                             /////////////////////////////////
                             // OUTPUT AND RETURN TO CALLER //
                             /////////////////////////////////
@@ -176,7 +172,7 @@ exports.predict = function( inputFlight, tracking, parentCallback ) {
                             } else {
                                 output.export( flight, table, false, analysis, stats, parentCallback );
                             }
-                            
+
                         });
                     });
                 }

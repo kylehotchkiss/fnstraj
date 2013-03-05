@@ -140,9 +140,6 @@ var writeDatabase = function ( flight, table, tracking, analysis, callback ) {
 			// CASE: FLIGHT EXISTS, APPENDING //
 			////////////////////////////////////
 			predictionIndex = flight.options.launchOffset;
-
-			console.log( "Prediction Index" + predictionIndex )
-
 			predictionTable = results.prediction;
 			predictionTable[predictionIndex] = table;
 		}

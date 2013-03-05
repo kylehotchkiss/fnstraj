@@ -135,10 +135,12 @@ exports.remove = function( path, callback ) {
                 port: db_port,
                 headers: { "If-Match": revision },
                 method: "DELETE"
-            }, function() {
-                if ( typeof callback !== "undefined") {
-                    callback();
-                }
+            }, function( response ) {
+                response.on("end", function() {
+                    if ( typeof callback !== "undefined") {
+                        callback();
+                    }
+                });
             }).on("error", function() {
                 if ( typeof callback !== "undefined" ) {
                     callback( false, true );

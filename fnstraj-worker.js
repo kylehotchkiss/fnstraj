@@ -8,9 +8,6 @@
  * we want to catch stack overflows and and see what happened.
  *
  * In the future,
- *  - delete database.write error handlers
- *  - Do things more async if possible
- *    (don't need to wait on DB for certain ops)
  *  - Move all console.logs for Worker purposes to here
  *
  */
@@ -119,8 +116,7 @@ var daemon = function() {
 							flightID: queuedID,
 
 							// Optional
-							resolution: 1,
-							overrideClimb: overrideClimb
+							resolution: 1
 						}, launch: {
 							altitude: parseFloat(queuedFlight.parameters.launch.altitude),
 							latitude: parseFloat(queuedFlight.parameters.launch.latitude),
@@ -156,6 +152,8 @@ var daemon = function() {
 									// CASE: POINTS UNAVAILABLE/FORWARD //
 									//////////////////////////////////////
 									database.remove('/fnstraj-queue/' + queuedID);
+
+									// Notify user to power on their SPOT.
 
 									advance();
 								} else {
@@ -198,7 +196,7 @@ var daemon = function() {
 												///////////////////////////////////////
 												var repredict = spot.processTracking( tracking, spotBase );
 
-												if ( flight.launch.timestamp + " " + ( spotBase.parameters.launch.timestamp + ( spotBase.prediction[0].length * 1000 * 60 )) ) {
+												if ( flight.launch.timestamp < ( spotBase.parameters.launch.timestamp + ( spotBase.prediction[0].length * 1000 * 60 )) ) {
 													if ( repredict ) {
 														//////////////////////////////////////////
 														// CASE: REPREDICT FROM LAST SPOT POINT //
@@ -252,9 +250,9 @@ var daemon = function() {
 												} else {
 													console.log("Spot Livetrack Done");
 
-													database.remove('/fnstraj-queue/' + queuedID);
-
-													advance();
+													database.remove('/fnstraj-queue/' + queuedID, function() {
+														advance();
+													});
 												}
 											}
 										}
@@ -287,9 +285,11 @@ var daemon = function() {
 									}
 								}
 
-								database.remove('/fnstraj-queue/' + queuedID);
+								database.remove('/fnstraj-queue/' + queuedID, function() {
+									advance();
+								});
 
-								advance();
+
 							});
 						}
 					});
