@@ -50,7 +50,11 @@ exports.read = function( path, callback ) {
                 results = JSON.parse( buffer );
             } catch ( error ) { }
 
-            if ( typeof callback !== "undefined" && typeof results !== "undefined" ) {
+            // if results.error, is false
+            if ( typeof callback !== "undefined"
+                && typeof results !== "undefined"
+                && typeof results.error === "undefined" ) {
+
                 callback( results );
             } else {
                 callback( false, true );

@@ -128,7 +128,7 @@ var writeDatabase = function ( flight, table, tracking, analysis, callback ) {
 	var flightID = flight.options.flightID;
 
 	database.read( "/fnstraj-flights/" + flightID, function( results, error ) {
-		if ( results.error ) {
+		if ( typeof error !== "undefined" && error ) {
 			//////////////////////////////////////////
 			// CASE: FLIGHT DOESN'T EXIST, INITIATE //
 			//////////////////////////////////////////

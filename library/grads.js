@@ -18,6 +18,7 @@ var http  = require("http");
 var async = require('async');
 var position = require('./position.js');
 
+
 var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
 
 

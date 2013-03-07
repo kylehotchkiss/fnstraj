@@ -28,8 +28,8 @@ var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
 // WORKER LOOP (Optimized for Heroku) //
 ////////////////////////////////////////
 var daemon = function() {
-
 	database.read('/fnstraj-queue/', function( results, error ) {
+
 		if ( typeof error !== "undefined" && error ) {
 			///////////////////////////////
 			// CASE: DATABASE DOWN/SLEEP //
@@ -103,8 +103,7 @@ var daemon = function() {
 					var flight = {
 						flags: {
 							spot: useSpot,
-							//active: true,
-							active: false,
+							active: true,
 							lastActivity: false
 						}, meta: {
 							name: queuedFlight.parameters.meta.name,
@@ -160,14 +159,14 @@ var daemon = function() {
 									////////////////////////////////////////
 									// CASE: TRACKING DATA EXISTS/FORWARD //
 									////////////////////////////////////////
-									database.read('/fnstraj-flights/' + queuedID, function( spotBase, error ) {
+									database.read('/fnstraj-flights/' + queuedID, function( prevFlight, prevError ) {
 										if ( typeof error !== "undefined" && error ) {
 											///////////////////////////////
 											// CASE: DATABASE DOWN/SLEEP //
 											///////////////////////////////
 											sleep();
 										} else {
-											if ( spotBase.error ) {
+											if ( typeof prevError !== "undefined" && prevError ) {
 												///////////////////////////////////////////
 												// Run First Prediction of SPOT Tracking //
 												///////////////////////////////////////////
@@ -194,27 +193,27 @@ var daemon = function() {
 												///////////////////////////////////////
 												// Run From Last SPOT Tracking Point //
 												///////////////////////////////////////
-												var repredict = spot.processTracking( tracking, spotBase );
+												var repredict = spot.processTracking( tracking, prevFlight );
 
-												if ( flight.launch.timestamp < ( spotBase.parameters.launch.timestamp + ( spotBase.prediction[0].length * 1000 * 60 )) ) {
+												if ( flight.launch.timestamp < ( prevFlight.parameters.launch.timestamp + ( prevFlight.prediction[0].length * 1000 * 60 )) ) {
 													if ( repredict ) {
 														//////////////////////////////////////////
 														// CASE: REPREDICT FROM LAST SPOT POINT //
 														//////////////////////////////////////////
-														spotBase.parameters.options.launchOffset = repredict;
-														//spotBase.parameters.launch.timestamp
+														prevFlight.parameters.options.launchOffset = repredict;
+														//prevFlight.parameters.launch.timestamp
 
-														if ( spot.determineOverride( tracking, spotBase ) ) {
-															spotBase.parameters.options.overrideClimb = true;
+														if ( spot.determineOverride( tracking, prevFlight ) ) {
+															prevFlight.parameters.options.overrideClimb = true;
 														}
 
 
-														spotBase.parameters.launch.latitude  = spotBase.flightpath[repredict].latitude;
-														spotBase.parameters.launch.longitude = spotBase.flightpath[repredict].longitude;
-														spotBase.parameters.launch.altitude  = spotBase.prediction[0][repredict].altitude;
+														prevFlight.parameters.launch.latitude  = prevFlight.flightpath[repredict].latitude;
+														prevFlight.parameters.launch.longitude = prevFlight.flightpath[repredict].longitude;
+														prevFlight.parameters.launch.altitude  = prevFlight.prediction[0][repredict].altitude;
 
 
-														fnstraj.predict( spotBase.parameters, spotBase.flightpath, function( predictorError ) {
+														fnstraj.predict( prevFlight.parameters, prevFlight.flightpath, function( predictorError ) {
 															database.write('/fnstraj-queue/' + queuedID, { parameters: flight }, function( error ) {
 																if ( typeof predictorError !== "undefined" && predictorError ) {
 																	/////////////////////////////

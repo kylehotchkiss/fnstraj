@@ -6,13 +6,13 @@
  *
  */
 
-var http        = require("http");
-var https       = require("https");
+var http		= require("http");
+var https		= require("https");
 var querystring = require('querystring');
 
 
-var mailgun_key  = process.env.MAILGUN_KEY;
-var mailgun_url  = process.env.MAILGUN_URL;
+var mailgun_key	= process.env.MAILGUN_KEY;
+var mailgun_url	= process.env.MAILGUN_URL;
 var mailgun_from = process.env.MAILGUN_FROM;
 
 
@@ -20,11 +20,11 @@ var mailgun_from = process.env.MAILGUN_FROM;
 // Locality name from Coordinates //
 ////////////////////////////////////
 exports.coordsToCity = function( latitude, longitude, callback ) {
-    /////////////////////////////////////////////////////////
-    // This will only be used in Async.parallel contexts   //
-    // API is coded for this accordiningly                 //
-    // DO NOT EXPORT (Working model in Codebox for Export) //
-    /////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////
+	// This will only be used in Async.parallel contexts	//
+	// API is coded for this accordiningly				 //
+	// DO NOT EXPORT (Working model in Codebox for Export) //
+	/////////////////////////////////////////////////////////
 	var location = "";
 
 	var geocode = http.get({
@@ -52,12 +52,12 @@ exports.coordsToCity = function( latitude, longitude, callback ) {
 					}
 				}
 
-				callback( null, locale );
+				callback( false, locale );
 
 			} else {
 				callback( true );
-		   }
-	   });
+			}
+		});
 	});
 
 	geocode.on('error', function() {
@@ -71,33 +71,33 @@ exports.coordsToCity = function( latitude, longitude, callback ) {
 // Email Wrapper (via Mailgun) //
 /////////////////////////////////
 exports.sendMail = function( to, subject, body, callback ) {
-    var status = "";
-    
-    var message = querystring.stringify({
-        from: mailgun_from,
-        to: to,
-        subject: subject,
-        text: body
-    });
+	var status = "";
+	
+	var message = querystring.stringify({
+		from: mailgun_from,
+		to: to,
+		subject: subject,
+		text: body
+	});
 
 	var mailgun = https.request({
-    	auth: "api" + ":key-" + mailgun_key,
-    	host: "api.mailgun.net",
-    	path: "/v2/" + mailgun_url + "/messages",
-    	headers: {  
-        	'Content-Type': 'application/x-www-form-urlencoded',
-            'Content-Length': message.length
-        },
-    	method: "POST"
+		auth: "api" + ":key-" + mailgun_key,
+		host: "api.mailgun.net",
+		path: "/v2/" + mailgun_url + "/messages",
+		headers: {	
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Content-Length': message.length
+		},
+		method: "POST"
 	}, function() {
-        if ( typeof callback !== "undefined" ) {
-            callback();
-        }
+		if ( typeof callback !== "undefined" ) {
+			callback();
+		}
 	}).on('error', function() {
-        if ( typeof callback !== "undefined" ) {
-            callback( true );
-        }
-    });
+		if ( typeof callback !== "undefined" ) {
+			callback( true );
+		}
+	});
 	
 	mailgun.write( message );
 	mailgun.end();

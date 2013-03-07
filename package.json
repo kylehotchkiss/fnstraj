@@ -4,10 +4,9 @@
     "author": "Kyle Hotchkiss <kyle@kylehotchkiss.com>",
     "description": "Trajectory Predictor",
     "dependencies": {
+        "twig":      "0.5.x",
         "async":     "0.1.x",
-        "hashids":   "0.1.x",
-        "express":   "3.x.x",
-        "validator": "0.4.x"
+        "express":   "3.x.x"
     },
     "license": "GPL",
     "engines": {
