@@ -9,6 +9,7 @@
  *
  * In the future,
  *  - Move all console.logs for Worker purposes to here
+ *  - Rewrite on Async.js Queue Engine, Sleep Longer
  *
  */
 
@@ -29,7 +30,6 @@ var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
 ////////////////////////////////////////
 var daemon = function() {
 	database.read('/fnstraj-queue/', function( results, error ) {
-
 		if ( typeof error !== "undefined" && error ) {
 			///////////////////////////////
 			// CASE: DATABASE DOWN/SLEEP //
@@ -51,11 +51,12 @@ var daemon = function() {
 					j++;
 				}
 
-
 				//////////////////////////////////////////////////////////
 				// Determine if queue items are already being worked on //
 				//////////////////////////////////////////////////////////
 				var continueQueue = false;
+
+				console.log(queue.length);
 
 				if ( queue.length === 1 ) {
 					if ( !queue[i].parameters.flags.active ) {

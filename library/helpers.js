@@ -66,7 +66,6 @@ exports.coordsToCity = function( latitude, longitude, callback ) {
 }
 
 
-
 /////////////////////////////////
 // Email Wrapper (via Mailgun) //
 /////////////////////////////////
