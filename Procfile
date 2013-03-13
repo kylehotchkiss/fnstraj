@@ -1,2 +1,2 @@
 web: node fnstraj-proxy.js
-worker: node fnstraj-worker.js 10
+worker: node fnstraj-worker-async.js

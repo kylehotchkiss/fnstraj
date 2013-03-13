@@ -14,9 +14,12 @@
  */
 
 var async	 = require('async');
-var spot     = require('./library/spot.js');
-var fnstraj	 = require('./library/fnstraj.js');
-var helpers	 = require('./library/helpers.js');
+
+
+var meta = require('./package.json');  
+var spot = require('./library/spot.js');
+var fnstraj	= require('./library/fnstraj.js');
+var helpers = require('./library/helpers.js');
 var database = require('./library/database.js');
 
 
@@ -102,8 +105,7 @@ var daemon = function() {
 					var flight = {
 						flags: {
 							spot: useSpot,
-							active: true,
-							lastActivity: false
+							active: true
 						}, meta: {
 							name: queuedFlight.parameters.meta.name,
 							email: queuedFlight.parameters.meta.email,

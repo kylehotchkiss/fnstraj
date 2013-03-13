@@ -2,10 +2,10 @@
     "name": "fnstraj",
     "version": "0.3.6",
     "author": "Kyle Hotchkiss <kyle@kylehotchkiss.com>",
-    "description": "Trajectory Predictor",
+    "description": "Backend for the fnstraj Trajectory Predictor",
     "dependencies": {
         "twig":      "0.5.x",
-        "async":     "0.1.x",
+        "async":     "0.2.x",
         "express":   "3.x.x"
     },
     "license": "GPL",
