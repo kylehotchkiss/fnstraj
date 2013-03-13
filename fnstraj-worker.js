@@ -314,7 +314,7 @@ var daemon = function() {
 // DAEMON ADVANCE //
 ////////////////////
 var advance = function() {
-	process.nextTick( function() {
+	setImmediate( function() {
 		daemon();
 	});
 };
@@ -325,7 +325,7 @@ var advance = function() {
 //////////////////
 var sleep = function() {
 	setTimeout(function() {
-		process.nextTick( function() {
+		setImmediate( function() {
 			daemon();
 		});
 	}, fnstraj_sleep);
