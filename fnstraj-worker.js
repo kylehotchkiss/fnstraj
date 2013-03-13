@@ -56,8 +56,6 @@ var daemon = function() {
 				//////////////////////////////////////////////////////////
 				var continueQueue = false;
 
-				console.log(queue.length);
-
 				if ( queue.length === 1 ) {
 					if ( !queue[i].parameters.flags.active ) {
 						continueQueue = true;
@@ -285,11 +283,9 @@ var daemon = function() {
 									}
 								}
 
-								database.remove('/fnstraj-queue/' + queuedID, function() {
-									advance();
-								});
-
-
+								database.remove('/fnstraj-queue/' + queuedID);
+								
+								advance();
 							});
 						}
 					});
@@ -314,7 +310,7 @@ var daemon = function() {
 // DAEMON ADVANCE //
 ////////////////////
 var advance = function() {
-	setImmediate( function() {
+	process.nextTick( function() {
 		daemon();
 	});
 };
@@ -325,7 +321,7 @@ var advance = function() {
 //////////////////
 var sleep = function() {
 	setTimeout(function() {
-		setImmediate( function() {
+		process.nextTick( function() {
 			daemon();
 		});
 	}, fnstraj_sleep);

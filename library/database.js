@@ -49,7 +49,7 @@ exports.read = function( path, callback ) {
             try {
                 results = JSON.parse( buffer );
             } catch ( error ) { }
-
+    
             // if results.error, is false
             if ( typeof callback !== "undefined"
                 && typeof results !== "undefined"
@@ -70,8 +70,8 @@ exports.read = function( path, callback ) {
 // DATABASE WRITE REQUEST //
 ////////////////////////////
 exports.write = function( path, data, callback ) {
-    exports.read( path, function( results ) {
-        if ( !results.error ) {
+    exports.read( path, function( results, error ) {
+        if ( typeof error === "undefined" ) {
             ////////////////////////////////
             // CASE: DATA EXISTS, REWRITE //
             ////////////////////////////////
@@ -125,7 +125,7 @@ exports.write = function( path, data, callback ) {
 /////////////////////////////
 exports.remove = function( path, callback ) {
     exports.read( path, function( results, error ) {
-        if (( typeof error !== "undefined" && error ) || results.error ) {
+        if ( typeof error !== "undefined" && error ) {
             if ( typeof callback !== "undefined" ) {
                 callback( false, true );
             }
