@@ -11,6 +11,8 @@
  * determine which forecast time to choose. They are based off of the time
  * difference between model forecast periods.
  *
+ * URL root: http://nomads.ncep.noaa.gov:9090/dods/
+ *
  */
 
 var url   = require("url");

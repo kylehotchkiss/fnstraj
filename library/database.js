@@ -124,6 +124,11 @@ exports.write = function( path, data, callback ) {
 // DATABASE DELETE REQUEST //
 /////////////////////////////
 exports.remove = function( path, callback ) {
+    //
+    // Callbacks here are rather unreliable.
+    // Currently just running this async, since status 
+    // is rather unimportant.
+    //
     exports.read( path, function( results, error ) {
         if ( typeof error !== "undefined" && error ) {
             if ( typeof callback !== "undefined" ) {

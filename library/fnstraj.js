@@ -53,16 +53,6 @@ exports.predict = function( inputFlight, tracking, parentCallback ) {
     }
 
 
-    //////////////////////////////////////////
-    // Pretty-printed Console Notifications //
-    //////////////////////////////////////////
-    console.log("Predicting: flight #" + flight.options.flightID + " on NOAA " + flight.options.model);
-
-    if ( fnstraj_debug === "true" ) {
-        console.log("URL root: http://nomads.ncep.noaa.gov:9090/dods/");
-    }
-
-
     async.whilst(
         ////////////////////
         // LOOP CONDITION //
@@ -115,8 +105,6 @@ exports.predict = function( inputFlight, tracking, parentCallback ) {
                     // Logic flow: calculation complete, finalize. //
                     /////////////////////////////////////////////////
                     flight.flying = false;
-
-                    console.log("Complete: flight #" + flight.options.flightID);
 
                     process.nextTick(function() {
                         ///////////////////////

@@ -4,6 +4,8 @@
  * Copyright 2011-2013 Kyle Hotchkiss
  * Released under the GPL
  *
+ * Mostly Depricated. Missing out on too many pieces.
+ *
  */
 
 var fnstraj = require('./library/fnstraj.js');
