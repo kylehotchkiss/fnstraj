@@ -137,8 +137,6 @@ var daemon = function() {
                                                         prevFlight.parameters.launch.longitude = prevFlight.flightpath[repredict].longitude;
                                                         prevFlight.parameters.launch.altitude  = prevFlight.prediction[0][repredict].altitude;
                     
-                                                        console.log(JSON.stringify(prevFlight));
-                    
                                                         fnstraj.predict( prevFlight.parameters, prevFlight.flightpath, function( predictorError ) {
                                                             database.write('/fnstraj-queue/' + id, { parameters: flight.parameters }, function( error ) {
                                                                 if ( typeof predictorError !== "undefined" && predictorError ) {

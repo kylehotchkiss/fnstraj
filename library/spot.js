@@ -129,7 +129,6 @@ exports.processTracking = function( tracking, flight ) {
 
         if ( difference > 0 && difference <= flight.prediction[0].length ) {
             if ( typeof flight.flightpath[difference] === "undefined" || flight.flightpath[difference] === null ) {
-                console.log("Offset: " + difference);
 
                 flight.flightpath[difference] = tracking[newPoint];
 
