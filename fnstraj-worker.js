@@ -4,15 +4,18 @@
  * Copyright 2011-2013 Kyle Hotchkiss
  * Released under the GPL
  *
+ * If possible, write-less spot update checks.
+ * Should save us over 300 requests/SPOT hour.
+ *
  */
 
 
 /////////////////////////
-// INCLUDES AND CONFIG // 
+// INCLUDES AND CONFIG //
 /////////////////////////
 var async = require('async');
 
-var meta = require('./package.json');  
+var meta = require('./package.json');
 var spot = require('./library/spot.js');
 var fnstraj	= require('./library/fnstraj.js');
 var helpers	= require('./library/helpers.js');
@@ -24,7 +27,7 @@ var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
 
 
 var daemon = function() {
-	database.read("/fnstraj-queue/", function( results, error ) {    
+	database.read("/fnstraj-queue/", function( results, error ) {
 		if (( typeof error !== "undefined" && error ) || results.total_rows === 0 ) {
 			///////////////////////////////////////////////
 			// CASE: No results || No Connection - SLEEP //
@@ -75,7 +78,7 @@ var daemon = function() {
 							//////////////////////////////////////////
 							// SPOT Tracking / Live Trajectory Mode //
 							//////////////////////////////////////////
-							spot.getTracking( flight.parameters.flags.spot, function( tracking, error ) {				
+							spot.getTracking( flight.parameters.flags.spot, function( tracking, error ) {
 								if ( typeof error !== "undefined" && error ) {
 									/////////////////////////////////////
 									// CASE: POINTS UNAVAILABLE - PASS //
@@ -229,7 +232,7 @@ var daemon = function() {
 							});
 						}
 					});
-				}                
+				}
 			}, 1);
 
 			queue.push( results.rows );
@@ -246,7 +249,7 @@ var daemon = function() {
 // LOCK-SAFE ADVANCE //
 ///////////////////////
 function advance() {
-	setImmediate(function() { 
+	setImmediate(function() {
 		daemon();
 	});
 }

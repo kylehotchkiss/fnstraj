@@ -114,12 +114,6 @@ exports.predict = function( inputFlight, tracking, parentCallback ) {
                         stats.predictorTime = (( stats.endTime - stats.startTime ) / 1000);
 
 
-                        /////////////
-                        // Cleanup //
-                        /////////////
-                        delete stats.endTime; delete stats.startTime;
-                        delete flight.flying; delete flight.status;
-
                         // reset launch to table[0];
 
 
@@ -131,6 +125,16 @@ exports.predict = function( inputFlight, tracking, parentCallback ) {
                         analysis.distance = position.distance( table[0].latitude, table[0].longitude, table[table.length - 1].latitude, table[table.length - 1].longitude );
                         analysis.midpoint = position.midpoint( table[0].latitude, table[0].longitude, table[table.length - 1].latitude, table[table.length - 1].longitude );
 
+
+                        /////////////
+                        // Cleanup //
+                        /////////////
+                        analysis.points = flight.points;
+                        
+                        delete flight.points;
+                        delete stats.endTime; delete stats.startTime;
+                        delete flight.flying; delete flight.status;
+                        
 
                         ///////////////////////////
                         // ASYNCHRONOUS ANALYSIS //
@@ -144,11 +148,11 @@ exports.predict = function( inputFlight, tracking, parentCallback ) {
                         ], function( error, results ) {
 
                             if ( results[0] ) {
-                                flight.points.launch = { name: results[0] };
+                                analysis.launch = { name: results[0] };
                             }
 
                             if ( results[1] ) {
-                                flight.points.landing = { name: results[1] };
+                                analysis.landing = { name: results[1] };
                             }
 
 
