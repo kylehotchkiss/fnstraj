@@ -148,11 +148,11 @@ exports.predict = function( inputFlight, tracking, parentCallback ) {
                         ], function( error, results ) {
 
                             if ( results[0] ) {
-                                analysis.launch = { name: results[0] };
+                                analysis.points.launch = { name: results[0] };
                             }
 
                             if ( results[1] ) {
-                                analysis.landing = { name: results[1] };
+                                analysis.points.landing = { name: results[1] };
                             }
 
 
