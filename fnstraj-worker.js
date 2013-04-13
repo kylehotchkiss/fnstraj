@@ -14,16 +14,23 @@
 // INCLUDES AND CONFIG //
 /////////////////////////
 var async = require('async');
+var couchdb = require('couchdb-simple');
 
 var meta = require('./package.json');
 var spot = require('./library/spot.js');
 var fnstraj	= require('./library/fnstraj.js');
 var helpers	= require('./library/helpers.js');
-var database = require('./library/database.js');
 
 var fnstraj_mode = process.env.FNSTRAJ_MODE || "development";
 var fnstraj_sleep = process.env.FNSTRAJ_SLEEP || 3000;
 var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
+
+var db_host = process.env.COUCHDB_HOST;
+var db_port = process.env.COUCHDB_PORT;
+var db_user = process.env.COUCHDB_USER;
+var db_pass = process.env.COUCHDB_PASS;
+
+var database = new couchdb( db_host, db_port, db_user, db_pass );
 
 
 var daemon = function() {
@@ -104,7 +111,7 @@ var daemon = function() {
 												// Run First Prediction of SPOT Tracking //
 												///////////////////////////////////////////
 												console.log("Predicting: flight #" + flight.parameters.options.flightID + " \x1B[47;30m " + flight.parameters.options.model  + " \x1B[0m \x1B[43;30m spot \x1B[0m");
-												
+
 												fnstraj.predict( flight.parameters, false, function( predictorError ) {
 													database.write('/fnstraj-queue/' + id, { parameters: flight.parameters }, function( error ) {
 														if ( typeof predictorError !== "undefined" && predictorError ) {
@@ -165,7 +172,7 @@ var daemon = function() {
 																	// Prediction Completion Email //
 																	/////////////////////////////////
 																	console.log("Complete: flight #" + flight.parameters.options.flightID);
-																	
+
 																	if ( flight.parameters.meta.email !== "" ) {
 																		emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + id + "\n\nThanks for experimenting with us,\n-fnstraj";
 
@@ -202,7 +209,7 @@ var daemon = function() {
 							// RUN PREDICTOR BASED ON FLIGHT OBJECT //
 							//////////////////////////////////////////
 							console.log("Predicting: flight #" + flight.parameters.options.flightID + " \x1B[47;30m " + flight.parameters.options.model  + " \x1B[0m");
-							
+
 							fnstraj.predict( flight.parameters, false, function( error ) {
 								if ( typeof error !== "undefined" && error ) {
 									/////////////////////////////
@@ -218,7 +225,7 @@ var daemon = function() {
 									// Prediction Completion Email //
 									/////////////////////////////////
 									console.log("Complete: flight #" + flight.parameters.options.flightID);
-									
+
 									if ( flight.parameters.meta.email !== "" ) {
 										emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + id + "\n\nThanks for experimenting with us,\n-fnstraj";
 

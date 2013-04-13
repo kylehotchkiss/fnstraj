@@ -8,7 +8,14 @@
 var fs       = require('fs');
 var http     = require('http');
 var async    = require('async');
-var database = require('./database.js')
+var couchdb  = require('couchdb-simple');
+
+var db_host = process.env.COUCHDB_HOST;
+var db_port = process.env.COUCHDB_PORT;
+var db_user = process.env.COUCHDB_USER;
+var db_pass = process.env.COUCHDB_PASS;
+
+var database = new couchdb( db_host, db_port, db_user, db_pass );
 
 
 ////////////////////////////////////////
