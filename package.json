@@ -6,7 +6,7 @@
     "dependencies": {
         "twig":      "0.5.x",
         "async":     "0.2.x",
-        "couchdb-simple": "x.x.x"
+        "couchdb-simple": "0.1.x"
     },
     "license": "GPL",
     "engines": {
