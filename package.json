@@ -1,14 +1,17 @@
 {
     "name": "fnstraj",
-    "version": "0.3.7",
+    "version": "0.3.8",
     "author": "Kyle Hotchkiss <kyle@kylehotchkiss.com>",
     "description": "Backend for the fnstraj Trajectory Predictor",
-    "dependencies": {
-        "twig":      "0.5.x",
-        "async":     "0.2.x",
-        "couchdb-simple": "x.x.x"
-    },
     "license": "GPL",
+    "scripts": {
+        "start": "node fnstraj-worker.js"
+    },
+    "dependencies": {
+        "async": "*",
+        "couchdb-simple": "*",
+        "couchdb-queue": "*"
+    },
     "engines": {
         "node": "0.10.x",
         "npm":  "1.2.x"

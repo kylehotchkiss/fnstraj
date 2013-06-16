@@ -4,11 +4,6 @@
 # Node Cuft
 node_modules/
 
-# Application Cuft
-exports/*.kml
-exports/*.csv
-exports/*.json
-
 # Localhost Configuration
 .env
 .env*
