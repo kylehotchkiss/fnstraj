@@ -161,7 +161,7 @@ var writeDatabase = function ( flight, table, tracking, analysis, callback ) {
 
 		database.write( "/fnstraj-flights/" + flightID, content, function( error ) {
 			if ( typeof error !== "undefined" && error ) {
-				console.log("  databasefail: " + error.message);
+				log.warn("  databasefail: " + error.message);
 				callback( true );
 			} else {
 				callback();

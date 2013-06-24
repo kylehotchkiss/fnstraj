@@ -15,14 +15,16 @@
  *
  */
 
+var log   = require('loglevel');
 var url   = require("url");
 var http  = require("http");
 var async = require('async');
 var position = require('./position.js');
 
 
-var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
+var fnstraj_loglevel = process.env.FNSTRAJ_LOGLEVEL || "debug";
 
+log.setLevel( fnstraj_loglevel );
 
 exports.wind = function( frame, time, flight, table, cache, stats, parentCallback ) {
     var gfs_hourset, gfs_offset, lev, u_ext, v_ext;
@@ -220,9 +222,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                     u_url = url.parse(baseURL + modelURL + u_ext);
                     u_res = "";
 
-                    if ( fnstraj_debug === "true" ) {
-                        console.log( "HIT: " + modelURL + u_ext );
-                    }
+                    log.debug( "HIT: " + modelURL + u_ext );
 
                     u_req = http.get({
                         hostname: u_url.hostname,
@@ -257,9 +257,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                     v_url = url.parse(baseURL + modelURL + v_ext);
                     v_res = "";
 
-                    if ( fnstraj_debug === "true" ) {
-                        console.log( "HIT: " + modelURL + v_ext );
-                    }
+                    log.debug( "HIT: " + modelURL + v_ext );
 
                     v_req = http.get({
                         hostname: v_url.hostname,
@@ -283,7 +281,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
             }
         }, function( error, results ) {
             if ( error ) {
-                    console.log("Failed: flight #" + flight.options.flightID + " (grads connectivity failure)");
+                log.warn("Failed: flight #" + flight.options.flightID + " (grads connectivity failure)");
 
                 parentCallback( error );
             } else {
@@ -298,7 +296,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                     // I answer, wallowing in all my lost predictions.
                     //
                     if ( fnstraj_debug === "true" ) {
-                        console.log("\n\033[1;31mGrADS Fail:\033[0m");
+                        log.warn("\n\033[1;31mGrADS Fail:\033[0m");
 
                         var u_errorStart = results.u_wind.indexOf("because of the following error:<p>\n<b>") + 38;
                         var u_errorEnd   = results.u_wind.indexOf("</b><p>\nCheck the syntax of your request,");
@@ -309,21 +307,21 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
 
                         if ( u_errorStart !== -1 && u_errorEnd !== -1 ) {
                             var u_error = results.u_wind.substring(u_errorStart, u_errorEnd);
-                            console.log("\033[0;31m" + u_error + "\033[0m\n");
+                            log.warn("\033[0;31m" + u_error + "\033[0m\n");
                             errorShown = true;
                         }
 
                         if ( v_errorStart !== -1 && v_errorEnd !== -1 && errorShown === false ) {
                             var v_error = results.v_wind.substring(v_errorStart, v_errorEnd);
-                            console.log("\033[0;31m" + v_error + "\033[0m\n");
+                            log.warn("\033[0;31m" + v_error + "\033[0m\n");
                             errorShown = true;
                         }
 
                         if ( !errorShown ) {
-                            console.log("\033[0;31mUnknown Error.\033[0m");
+                            log.warn("\033[0;31mUnknown Error.\033[0m");
                         }
                     } else {
-                        console.log("Failed: flight #" + flight.options.flightID + " (gradsfail)");
+                        log.warn("Failed: flight #" + flight.options.flightID + " (gradsfail)");
                     }
 
                     parentCallback( true );
@@ -339,7 +337,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
                         ///////////////////////////////////////////////
                         // CASE: FILL VALUE DETECTED, CANNOT ADVANCE //
                         ///////////////////////////////////////////////
-                        console.log("Failed: flight #" + flight.options.flightID + " (Fill value caught)");
+                        log.warn("Failed: flight #" + flight.options.flightID + " (Fill value caught)");
                     }
 
                     offset  = Math.atan2( v_wind, u_wind ) * degrees; // Is an offset from {below} value.
@@ -368,7 +366,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
         /////////////////////////////////////
         // CASE: CORRUPT DATA VALUE CAUGHT //
         /////////////////////////////////////
-        console.log("Failed: flight #" + flight.options.flightID + " (GrADS data was corrupt)");
+        log.warn("Failed: flight #" + flight.options.flightID + " (GrADS data was corrupt)");
 
         parentCallback( true );
     }

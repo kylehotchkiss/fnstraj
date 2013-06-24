@@ -1,19 +1,20 @@
 {
-    "name": "fnstraj",
-    "version": "0.3.8",
-    "author": "Kyle Hotchkiss <kyle@kylehotchkiss.com>",
-    "description": "Backend for the fnstraj Trajectory Predictor",
-    "license": "GPL",
-    "scripts": {
-        "start": "node fnstraj-worker.js"
-    },
-    "dependencies": {
-        "async": "*",
-        "couchdb-simple": "*",
-        "couchdb-queue": "*"
-    },
-    "engines": {
-        "node": "0.10.x",
-        "npm":  "1.2.x"
-    }
+  "name": "fnstraj",
+  "version": "0.3.8",
+  "author": "Kyle Hotchkiss <kyle@kylehotchkiss.com>",
+  "description": "Backend for the fnstraj Trajectory Predictor",
+  "license": "GPL",
+  "scripts": {
+    "start": "node fnstraj-worker.js"
+  },
+  "dependencies": {
+    "async": "*",
+    "couchdb-simple": "*",
+    "couchdb-queue": "*",
+    "loglevel": "~0.3.0"
+  },
+  "engines": {
+    "node": "0.10.x",
+    "npm": "1.2.x"
+  }
 }

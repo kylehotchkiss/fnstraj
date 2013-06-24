@@ -13,6 +13,7 @@
 /////////////////////////
 // INCLUDES AND CONFIG //
 /////////////////////////
+var log = require('loglevel');
 var couchdb = require('couchdb-simple');
 var queue = require('couchdb-queue');
 
@@ -22,13 +23,14 @@ var fnstraj	= require('./library/fnstraj.js');
 var helpers	= require('./library/helpers.js');
 
 var fnstraj_sleep = process.env.FNSTRAJ_SLEEP || 3000;
-var fnstraj_debug = process.env.FNSTRAJ_DEBUG || false;
+var fnstraj_loglevel = process.env.FNSTRAJ_LOGLEVEL || "debug";
 
 var db_host = process.env.COUCHDB_HOST;
 var db_port = process.env.COUCHDB_PORT;
 var db_user = process.env.COUCHDB_USER;
 var db_pass = process.env.COUCHDB_PASS;
 
+log.setLevel( fnstraj_loglevel );
 var database = new couchdb( db_host, db_port, db_user, db_pass );
 
 var daemon = function() {
@@ -98,7 +100,7 @@ var daemon = function() {
 										///////////////////////////////////////////
 										// Run First Prediction of SPOT Tracking //
 										///////////////////////////////////////////
-										console.log("Predicting: flight #" + flight.parameters.options.flightID + " \x1B[47;30m " + flight.parameters.options.model  + " \x1B[0m \x1B[43;30m spot \x1B[0m");
+										log.info("Predicting: flight #" + flight.parameters.options.flightID + " \x1B[47;30m " + flight.parameters.options.model  + " \x1B[0m \x1B[43;30m spot \x1B[0m");
 
 										fnstraj.predict( flight.parameters, false, function( predictorError ) {
 											database.write('/fnstraj-queue/' + id, { parameters: flight.parameters }, function( error ) {
@@ -112,7 +114,7 @@ var daemon = function() {
 													// CASE: COMPLETE - FORWARD //
 													//////////////////////////////
 
-													console.log("Complete: flight #" + flight.parameters.options.flightID);
+													log.info("Complete: flight #" + flight.parameters.options.flightID);
 												}
 
 												callback( true );
@@ -142,7 +144,7 @@ var daemon = function() {
 												prevFlight.parameters.launch.longitude = prevFlight.flightpath[repredict].longitude;
 												prevFlight.parameters.launch.altitude  = prevFlight.prediction[0][repredict].altitude;
 
-												console.log("Predicting: flight #" + flight.parameters.options.flightID + " \x1B[47;30m " + flight.parameters.options.model  + " \x1B[0m \x1B[43;30m spot \x1B[0m" + overrideMessage);
+												log.info("Predicting: flight #" + flight.parameters.options.flightID + " \x1B[47;30m " + flight.parameters.options.model  + " \x1B[0m \x1B[43;30m spot \x1B[0m" + overrideMessage);
 
 												fnstraj.predict( prevFlight.parameters, prevFlight.flightpath, function( predictorError ) {
 													database.write('/fnstraj-queue/' + id, { parameters: flight.parameters }, function( error ) {
@@ -159,7 +161,7 @@ var daemon = function() {
 															/////////////////////////////////
 															// Prediction Completion Email //
 															/////////////////////////////////
-															console.log("Complete: flight #" + flight.parameters.options.flightID);
+															log.info("Complete: flight #" + flight.parameters.options.flightID);
 
 															if ( flight.parameters.meta.email !== "" ) {
 																emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + id + "\n\nThanks for experimenting with us,\n-fnstraj";
@@ -180,7 +182,7 @@ var daemon = function() {
 												});
 											}
 										} else {
-											console.log("Spot Livetrack Done");
+											log.info("Spot Livetrack Done");
 
 											// Safe to Delete
 											callback();
@@ -195,7 +197,7 @@ var daemon = function() {
 					//////////////////////////////////////////
 					// RUN PREDICTOR BASED ON FLIGHT OBJECT //
 					//////////////////////////////////////////
-					console.log("Predicting: flight #" + flight.parameters.options.flightID + " \x1B[47;30m " + flight.parameters.options.model  + " \x1B[0m");
+					log.info("Predicting: flight #" + flight.parameters.options.flightID + " \x1B[47;30m " + flight.parameters.options.model  + " \x1B[0m");
 
 					fnstraj.predict( flight.parameters, false, function( error ) {
 						if ( typeof error !== "undefined" && error ) {
@@ -214,7 +216,7 @@ var daemon = function() {
 							/////////////////////////////////
 							// Prediction Completion Email //
 							/////////////////////////////////
-							console.log("Complete: flight #" + flight.parameters.options.flightID);
+							log.info("Complete: flight #" + flight.parameters.options.flightID);
 							
 							if ( flight.parameters.meta.email !== "" ) {
 								emailContent = "Hey There,\n\nWe are happy to inform you that your trajectory request successfully compiled!\n\nYou can view it here:\n        http://fnstraj.org/view/" + id + "\n\nThanks for experimenting with us,\n-fnstraj";
@@ -240,7 +242,7 @@ var daemon = function() {
 	//////////////////////////////////////////////
 	// Database Configuration and Status Checks //
 	//////////////////////////////////////////////
-	console.log("\x1B[47;30m fnstraj backend, v." + meta.version + " \x1B[0m");
+	log.info("\x1B[47;30m fnstraj backend, v." + meta.version + " \x1B[0m");
 
 	if (
 		typeof process.env.COUCHDB_HOST === "undefined" ||
@@ -248,11 +250,11 @@ var daemon = function() {
 		typeof process.env.COUCHDB_USER === "undefined" ||
 		typeof process.env.COUCHDB_PASS === "undefined"
 	) {
-		console.log("Database configuration unavailable! RTFM! ...dies...");
+		log.error("Database configuration unavailable! RTFM! ...dies...");
 	} else {
 
 		if ( typeof process.env.FNSTRAJ_SLEEP === "undefined" ) {
-			console.log("FNSTRAJ_SLEEP was undefined, defaulting to 3 seconds.");
+			log.info("FNSTRAJ_SLEEP was undefined, defaulting to 3 seconds.");
 		}
 
 		if ( typeof process.argv[2] === "string" && !isNaN(parseInt(process.argv[2], 10)) ) {
