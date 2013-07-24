@@ -224,7 +224,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
 
                     u_req = request(u_url, function ( error, response, body ) {
                         if ( !error ) {
-                            callback(null, response);
+                            callback(null, body);
                             
                             stats.gradsHits++;
                         } else {
@@ -249,7 +249,7 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
 
                     v_req = request(v_url, function ( error, response, body ) {
                         if ( !error ) {
-                            callback(null, response);
+                            callback(null, body);
                             
                             stats.gradsHits++;
                         } else {
