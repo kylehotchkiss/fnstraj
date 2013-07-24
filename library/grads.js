@@ -16,9 +16,8 @@
  */
 
 var log   = require('loglevel');
-var url   = require("url");
-var http  = require("http");
 var async = require('async');
+var request = require('request');
 var position = require('./position.js');
 
 
@@ -219,28 +218,18 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
 
                     stats.cacheHits++;
                 } else {
-                    u_url = url.parse(baseURL + modelURL + u_ext);
-                    u_res = "";
+                    u_url = baseURL + modelURL + u_ext;
 
                     log.debug( "HIT: " + modelURL + u_ext );
 
-                    u_req = http.get({
-                        hostname: u_url.hostname,
-                        path: u_url.path
-                    }, function( response ) {
-                        response.setEncoding('utf8');
-
-                        response.on("data", function( data ) {
-                            u_res += data
-                        });
-
-                        response.on("end", function() {
-                           callback(null, u_res);
-
-                           stats.gradsHits++;
-                        });
-                    }).on("error", function() {
-                        callback(true, null);
+                    u_req = request(u_url, function ( error, response, body ) {
+                        if ( !error ) {
+                            callback(null, response);
+                            
+                            stats.gradsHits++;
+                        } else {
+                            callback(true, null);
+                        }
                     });
                 }
             },
@@ -254,28 +243,18 @@ exports.wind = function( frame, time, flight, table, cache, stats, parentCallbac
 
                     stats.cacheHits++;
                 } else {
-                    v_url = url.parse(baseURL + modelURL + v_ext);
-                    v_res = "";
+                    v_url = baseURL + modelURL + v_ext;
 
                     log.debug( "HIT: " + modelURL + v_ext );
 
-                    v_req = http.get({
-                        hostname: v_url.hostname,
-                        path: v_url.path
-                    }, function( response ) {
-                        response.setEncoding('utf8');
-
-                        response.on("data", function( data ) {
-                            v_res += data
-                        });
-
-                        response.on("end", function() {
-                            callback(null, v_res);
-
+                    v_req = request(v_url, function ( error, response, body ) {
+                        if ( !error ) {
+                            callback(null, response);
+                            
                             stats.gradsHits++;
-                        });
-                    }).on("error", function() {
-                       callback(true, null);
+                        } else {
+                            callback(true, null);
+                        }
                     });
                 }
             }

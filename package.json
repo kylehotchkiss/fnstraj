@@ -11,7 +11,8 @@
     "async": "*",
     "couchdb-simple": "*",
     "couchdb-queue": "*",
-    "loglevel": "~0.3.0"
+    "loglevel": "*",
+    "request": "*"
   },
   "engines": {
     "node": "0.10.x",
