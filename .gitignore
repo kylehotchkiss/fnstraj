@@ -3,6 +3,7 @@
 
 # Node Cuft
 node_modules/
+.npm-debug
 
 # Localhost Configuration
 .env
